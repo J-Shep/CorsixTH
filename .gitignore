@@ -55,6 +55,10 @@ RelWithDebInfo/
 # This is for the CMake-generated Visual Studio project
 *.vcxproj*
 CorsixTH_Top_Level*
+CorsixTH.opensdf
+CorsixTH.sdf
+CorsixTH.sln
+CorsixTH.*.suo
 
 # For the LevelEdit project
 *.class
