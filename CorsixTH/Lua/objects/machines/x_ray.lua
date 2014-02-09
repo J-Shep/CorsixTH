@@ -47,7 +47,8 @@ object.usage_animations = copy_north_to_south {
       ["Slack Female Patient"] = 2948,
       ["Slack Male Patient"] = 5178,
       ["Elvis Patient"] = 5120,
-      ["Chewbacca Patient"] = 5132,
+      ["Chewbacca Male Patient"] = 5132,
+      ["Chewbacca Female Patient"] = 5132,
       ["Invisible Patient"] = 614,
       ["Handyman"] = 3558,
     },
@@ -57,7 +58,8 @@ object.usage_animations = copy_north_to_south {
       ["Slack Female Patient"] = 2952,
       ["Slack Male Patient"] = 5174,
       ["Elvis Patient"] = 5128,
-      ["Chewbacca Patient"] = 610,
+      ["Chewbacca Male Patient"] = 610,
+      ["Chewbacca Female Patient"] = 610,
       ["Invisible Patient"] = 5140,
       ["Handyman"] = 3562,
     },
@@ -67,7 +69,8 @@ object.usage_animations = copy_north_to_south {
       ["Slack Female Patient"] = 2956,
       ["Slack Male Patient"] = 5182,
       ["Elvis Patient"] = 5124,
-      ["Chewbacca Patient"] = 5136, -- or 5138?
+      ["Chewbacca Male Patient"] = 5136, -- or 5138?
+      ["Chewbacca Female Patient"] = 5136, -- or 5138?
       ["Invisible Patient"] = 618,
       ["Handyman"] = 3562, -- TODO: Another glitch in the original. This sprite is missing.
     },

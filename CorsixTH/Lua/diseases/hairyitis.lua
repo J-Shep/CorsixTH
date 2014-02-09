@@ -30,15 +30,21 @@ disease.cure_price = 1150
 disease.emergency_sound = "emerg008.wav"
 disease.emergency_number = 12
 disease.initPatient = function(patient)
-  patient:setType("Chewbacca Patient")
-  -- NB: Layers have no effect on the appearance until cured, at which point
-  -- they are standard male patient layers. The clinic does however sometimes  
-  -- change this so that a female emerge.
-  patient:setLayer(0, math.random(1, 5) * 2)
-  patient:setLayer(1, math.random(0, 3) * 2)
-  patient:setLayer(2, math.random(0, 1) * 2)
-  patient:setLayer(3, 0)
-  patient:setLayer(4, 0)
+	local which = math.random(0, 1) -- male or female?
+    patient:setType((which == 0) and "Chewbacca Male Patient" or "Chewbacca Female Patient")
+    patient.change_into = (which == 0) and "Standard Male Patient" or "Standard Female Patient"
+ -- NB: Layers have no effect on the appearance until cured:
+    if which == 0 then
+      patient:setLayer(0, math.random(1, 5) * 2)
+	  patient:setLayer(1, math.random(0, 3) * 2)
+	  patient:setLayer(2, math.random(0, 1) * 2)
+	  patient:setLayer(3, 0)
+	  patient:setLayer(4, 0)
+    else
+      patient:setLayer(0, math.random(1, 4) * 2)
+      patient:setLayer(1, math.random(0, 3) * 2)
+      patient:setLayer(2, 0)
+  end
 end
 -- Diagnosis rooms are the rooms other than the GPs office which can be visited
 -- to aid in diagnosis. The need not be visited, and if they are visited, the

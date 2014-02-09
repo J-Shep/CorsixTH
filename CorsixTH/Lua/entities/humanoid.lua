@@ -114,7 +114,8 @@ anims("Stripped Female Patient",    834,  836,  842,  844)                      
 anims("Stripped Female Patient 2",    834,  836,  842,  844)                           -- 0-16
 anims("Stripped Female Patient 3",    834,  836,  842,  844)    
 anims("Transparent Female Patient",3012, 3014, 3020, 3022, 3052, 3054,  3068,  3070) -- 0-8, ABC
-anims("Chewbacca Patient",          858,  860,  866,  868, 3526, 3528,  4150,  4152)
+anims("Chewbacca Male Patient",    858,  860,  866,  868, 3526, 3528,  4150,  4152)
+anims("Chewbacca Female Patient",  858,  860,  866,  868, 3526, 3528,  4150,  4152)
 anims("Elvis Patient",              978,  980,  986,  988, 3634, 3636,  4868,  4870)
 anims("Invisible Patient",         1642, 1644, 1840, 1842, 1796, 1798,  4192,  4194)
 anims("Alien Male Patient",        3598, 3600, 3606, 3608,  182,  184,   286,   288, 3626,  3628) -- remember, no "normal"-doors animation
@@ -138,7 +139,8 @@ die_anims("Transparent Male Patient",  4412, 2434, 2438, 2446,  2450,  4416) -- 
 die_anims("Standard Female Patient",   3116, 3208, 3212, 3216,  3220)
 die_anims("Slack Female Patient",      4288, 3208, 3212, 3216,  3220)
 die_anims("Transparent Female Patient",4420, 3208, 3212, 3216,  3220,  4428) -- Extra = Transformation
-die_anims("Chewbacca Patient",         4182, 2434, 2438, 2446,  2450) -- Only males die... (1222 is the Female)
+die_anims("Chewbacca Male Patient",    4182, 2434, 2438, 2446,  2450) -- Only males die... (1222 is the Female)
+die_anims("Chewbacca Female Patient",  1222, 3208, 3212, 3216,  3220)
 die_anims("Elvis Patient",              974, 2434, 2438, 2446,  2450,  4186) -- Extra = Transformation
 die_anims("Invisible Patient",         4200, 2434, 2438, 2446,  2450)
 die_anims("Alien Male Patient",        4882, 2434, 2438, 2446,  2450)
@@ -179,7 +181,8 @@ vomit_anim("Elvis Patient",              1034)
 vomit_anim("Standard Female Patient",    3184)
 vomit_anim("Standard Male Patient",      2056)
 vomit_anim("Alternate Male Patient",     4476)
-vomit_anim("Chewbacca Patient",          4138)
+vomit_anim("Chewbacca Male Patient",     4138)
+vomit_anim("Chewbacca Female Patient",   4138)
 vomit_anim("Invisible Patient",          4204)
 vomit_anim("Slack Male Patient",         4324)
 vomit_anim("Transparent Female Patient", 4452)
@@ -217,7 +220,8 @@ pee_anim("Slack Female Patient",       4744)
 pee_anim("Standard Male Patient",      2244) 
 pee_anim("Alternate Male Patient",     4472)
 pee_anim("Slack Male Patient",         4328)
-pee_anim("Chewbacca Patient",          4178)
+pee_anim("Chewbacca Male Patient",     4178)
+pee_anim("Chewbacca Female Patient",   4178)
 pee_anim("Invisible Patient",          4208)
 pee_anim("Transparent Female Patient", 4852)
 pee_anim("Transparent Male Patient",   4848)
@@ -473,7 +477,7 @@ function Humanoid:isMoodActive(mood)
 end
 
 function Humanoid.getIdleAnimation(humanoid_class)
-  return assert(walk_animations[humanoid_class], "Invalid humanoid class").idle_east
+  return assert(walk_animations[humanoid_class], "Invalid humanoid class: " .. tostring(humanoid_class)).idle_east
 end
 
 function Humanoid:getCurrentMood()

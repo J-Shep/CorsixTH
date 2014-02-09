@@ -59,14 +59,7 @@ function ElectrolysisRoom:commandEnteringPatient(patient)
       local num_electrocutions = math.random(1, 5) * (2 - staff.profile.skill)
       -- We need to change to another type before starting, to be able
       -- to have different animations depending on gender.
-      if math.random(0, 1) == 1 then
-        patient:setType("Standard Male Patient") -- Other attributes already set
-      else
-        patient:setType("Standard Female Patient")
-        patient:setLayer(0, math.random(1, 4) * 2)
-        patient:setLayer(1, math.random(0, 3) * 2)
-        patient:setLayer(2, 0)
-      end
+      patient:setType(patient.change_into)
       patient:setNextAction{
         name = "use_object",
         object = electrolyser,
