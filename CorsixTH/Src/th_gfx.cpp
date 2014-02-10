@@ -195,6 +195,14 @@ unsigned int THAnimationManager::getFirstFrame(unsigned int iAnimation) const
         return 0;
 }
 
+unsigned int THAnimationManager::getFrameNumber(unsigned int iAnimation, unsigned int iFrameNumber) const
+{
+    int iFirstFrame = getFirstFrame(iAnimation);
+    if(iFrameNumber == 0) return iFirstFrame;
+    else if (iFrameNumber > m_iFrameCount) return 0;
+    else return iFirstFrame + iFrameNumber;
+}
+
 unsigned int THAnimationManager::getNextFrame(unsigned int iFrame) const
 {
     if(iFrame < m_iFrameCount)
@@ -1065,11 +1073,11 @@ void THAnimation::setParent(THAnimation *pParent)
     }
 }
 
-void THAnimation::setAnimation(THAnimationManager* pManager, unsigned int iAnimation)
+void THAnimation::setAnimation(THAnimationManager* pManager, unsigned int iAnimation, unsigned int iStartFrame)
 {
     m_pManager = pManager;
     m_iAnimation = iAnimation;
-    m_iFrame = pManager->getFirstFrame(iAnimation);
+    m_iFrame = pManager->getFrameNumber(iAnimation, iStartFrame);
     if(m_pMorphTarget)
     {
         m_pMorphTarget = NULL;

@@ -49,10 +49,12 @@ is used both to mean things which are animated and things which are static.
 
 !param animation (integer) The ordinal into the main animation set
 !param flags (integer) A combination of zero or more drawing flags to control
+!param start_frame (integer) optional
+!param last_frame (integer) optional
 the use of alternative palettes, transparency, and other similar settings. See
 `THDF_` values in `th_gfx.h` for the possible bit values.
 ]]
-function Entity:setAnimation(animation, flags)
+function Entity:setAnimation(animation, flags, start_frame, last_frame)
   flags = flags or 0
   if self.permanent_flags then
     flags = flags + self.permanent_flags
@@ -60,7 +62,7 @@ function Entity:setAnimation(animation, flags)
   if animation ~= self.animation_idx or flags ~= self.animation_flags then
     self.animation_idx = animation
     self.animation_flags = flags
-    self.th:setAnimation(self.world.anims, animation, flags)
+    self.th:setAnimation(self.world.anims, animation, flags, start_frame)
   end
   return self
 end

@@ -230,6 +230,9 @@ public:
     //! Get the index of the first frame of an animation
     unsigned int getFirstFrame(unsigned int iAnimation) const;
 
+    //! Get an animation's index for the specified frame number.
+    unsigned int getFrameNumber(unsigned int iAnimation, unsigned int iFrameNumber) const;
+
     //! Get the index of the frame after a given frame
     /*!
         To draw an animation frame by frame, call getFirstFrame() to get the
@@ -415,7 +418,7 @@ public:
     unsigned int getFrame() const {return m_iFrame;}
     int getCropColumn() const {return m_iCropColumn;}
 
-    void setAnimation(THAnimationManager* pManager, unsigned int iAnimation);
+    void setAnimation(THAnimationManager* pManager, unsigned int iAnimation, unsigned int iStartFrame = 0);
     void setMorphTarget(THAnimation *pMorphTarget, unsigned int iDurationFactor = 1);
     void setFrame(unsigned int iFrame);
     

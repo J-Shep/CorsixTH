@@ -258,6 +258,7 @@ static int l_anim_set_anim(lua_State *L)
 {
     THAnimation* pAnimation = luaT_testuserdata<THAnimation>(L);
     THAnimationManager* pManager = luaT_testuserdata<THAnimationManager>(L, 2);
+    int iStartFrame = 0;
     int iAnim = luaL_checkint(L, 3);
     if(iAnim < 0 || (unsigned int)iAnim >= pManager->getAnimationCount())
         luaL_argerror(L, 3, "Animation index out of bounds");
@@ -267,7 +268,9 @@ static int l_anim_set_anim(lua_State *L)
     else
         pAnimation->setFlags(luaL_checkint(L, 4));
 
-    pAnimation->setAnimation(pManager, iAnim);
+    if(lua_isnoneornil(L, 5) == false) iStartFrame = luaL_checkint(L, 5);
+
+    pAnimation->setAnimation(pManager, iAnim, iStartFrame);
     lua_settop(L, 2);
     luaT_setenvfield(L, 1, "animator");
     lua_pushnil(L);
