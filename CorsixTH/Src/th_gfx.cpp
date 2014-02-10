@@ -200,15 +200,26 @@ unsigned int THAnimationManager::getFrameNumber(unsigned int iAnimation, unsigne
     int iFirstFrame = getFirstFrame(iAnimation);
     if(iFrameNumber == 0) return iFirstFrame;
     else if (iFrameNumber > m_iFrameCount) return 0;
-    else return iFirstFrame + iFrameNumber;
+    else return iFirstFrame + (iFrameNumber - 1);
 }
 
 unsigned int THAnimationManager::getNextFrame(unsigned int iFrame) const
 {
-    if(iFrame < m_iFrameCount)
+	return getNextFrame(iFrame,0);
+}
+
+unsigned int THAnimationManager::getNextFrame(unsigned int iFrame, unsigned int iStartFrame) const
+{
+    if (iFrame < m_iFrameCount)
+    {
+        if (iStartFrame != 0)
+        {
+            if (m_pFrames[iFrame].iNextFrame < iFrame) return iStartFrame;
+        }
+
         return m_pFrames[iFrame].iNextFrame;
-    else
-        return iFrame;
+    }
+    else return iFrame;
 }
 
 void THAnimationManager::setAnimationAltPaletteMap(unsigned int iAnimation, const unsigned char* pMap)
@@ -803,6 +814,7 @@ THAnimation::THAnimation()
     m_pMorphTarget = NULL;
     m_iAnimation = 0;
     m_iFrame = 0;
+    m_iStartFrame = 0;
     m_iCropColumn = 0;
     m_iSpeedX = 0;
     m_iSpeedY = 0;
@@ -879,6 +891,8 @@ void THAnimation::persist(LuaPersistWriter *pWriter) const
     }
     pWriter->writeVUInt(iNumLayers);
     pWriter->writeByteStream(m_oLayers.iLayerContents, iNumLayers);
+
+    pWriter->writeVUInt(m_iStartFrame);
 }
 
 void THAnimation::depersist(LuaPersistReader *pReader)
@@ -985,6 +999,9 @@ void THAnimation::depersist(LuaPersistReader *pReader)
                 break;
         }
 
+        if(!pReader->readVUInt(m_iStartFrame))
+            break;
+
         // Fix the m_pAnimator field
         luaT_getenvfield(L, 2, "animator");
         m_pManager = (THAnimationManager*)lua_touserdata(L, -1);
@@ -998,7 +1015,8 @@ void THAnimation::depersist(LuaPersistReader *pReader)
 
 void THAnimation::tick()
 {
-    m_iFrame = m_pManager->getNextFrame(m_iFrame);
+    m_iFrame = m_pManager->getNextFrame(m_iFrame, m_iStartFrame);
+
     if(m_fnDraw != THAnimation_DrawChild)
     {
         m_iX += m_iSpeedX;
@@ -1078,6 +1096,8 @@ void THAnimation::setAnimation(THAnimationManager* pManager, unsigned int iAnima
     m_pManager = pManager;
     m_iAnimation = iAnimation;
     m_iFrame = pManager->getFrameNumber(iAnimation, iStartFrame);
+    if(iStartFrame != 0) m_iStartFrame = m_iFrame;
+
     if(m_pMorphTarget)
     {
         m_pMorphTarget = NULL;

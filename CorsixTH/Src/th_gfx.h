@@ -241,6 +241,8 @@ public:
     */
     unsigned int getNextFrame(unsigned int iFrame) const;
 
+	unsigned int getNextFrame(unsigned int iFrame, unsigned int iStartFrame) const;
+
     //! Set the palette remap data for an animation
     /*!
         This sets the palette remap data for every single sprite used by the
@@ -434,6 +436,7 @@ protected:
     THAnimation* m_pMorphTarget;
     unsigned int m_iAnimation;
     unsigned int m_iFrame;
+    unsigned int m_iStartFrame;
     union { struct {
         //! Amount to change m_iX per tick
         int m_iSpeedX;
