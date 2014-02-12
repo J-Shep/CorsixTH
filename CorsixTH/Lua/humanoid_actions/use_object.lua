@@ -68,7 +68,7 @@ local function action_use_next_phase(action, phase)
     if phase == 5 and not action.anims.finish_use_5 then
     phase = phase + 1
   end
-  if phase == 6 and not action.do_walk then
+  if phase == 6 and not action.do_walk or phase == 6 and action.destroy_user_after_use then
     phase = phase + 1
   end
   if phase > 6 then
@@ -311,10 +311,16 @@ action_use_object_tick = permanent"action_use_object_tick"( function(humanoid)
       -- Note that after_use is not called if the room has been destroyed!
       -- In that case both the patient, staff member(s) and
       -- the actual object are already dead.
-      if action.after_use then
-        action.after_use()
+      if action.after_use then 
+		action.after_use() 
+	  end
+      
+      if action.destroy_user_after_use then
+        humanoid:setHospital(nil)
+        humanoid.world:destroyEntity(humanoid)
+      else
+        humanoid:finishAction(action)
       end
-      humanoid:finishAction(action)
     end
   else
     action_use_phase(action, humanoid, phase)
@@ -331,7 +337,12 @@ local action_use_object_interrupt = permanent"action_use_object_interrupt"( func
     end
     humanoid:setTimer(nil)
     humanoid:setTilePositionSpeed(action.old_tile_x, action.old_tile_y)
-    humanoid:finishAction()
+    if action.destroy_user_after_use and action.destroy_user_if_interrupted then
+      humanoid:setHospital(nil)
+      humanoid.world:destroyEntity(humanoid)
+    else
+      humanoid:finishAction(action)
+    end
   elseif not humanoid.timer_function then
     humanoid:setTimer(1, action_use_object_tick)
   end
