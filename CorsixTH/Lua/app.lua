@@ -1242,6 +1242,7 @@ function App:afterLoad()
   if new == old then
     self.world:gameLog("Savegame version is " .. new .. " (" .. self:getVersion()
       .. "), originally it was " .. first .. " (" .. self:getVersion(first) .. ")")
+    self.world:playLoadedEntitySounds()
     return
   elseif new > old then
     self.world:gameLog("Savegame version changed from " .. old .. " (" .. self:getVersion(old) ..
