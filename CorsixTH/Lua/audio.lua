@@ -376,11 +376,7 @@ function Audio:playSoundsAtEntityInRandomSequenceRecursionHandler(sounds, entity
 
       self.unused_played_callback_id = self.unused_played_callback_id + 1
       if #silences > 1 then
-        if (silences_pointer + 1) > #silences then
-          silences_pointer = 1
-        else
-          silences_pointer = silences_pointer + 1
-        end
+        silences_pointer = (silences_pointer % #silences) + 1
       end
     --If the sound can't be played now:
     else
