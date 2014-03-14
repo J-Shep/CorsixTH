@@ -1256,6 +1256,13 @@ function App:afterLoad()
   end
   self.world.savegame_version = new
 
+  if old < 84 then
+    local new_object = dofile "objects/gates_to_hell"
+    Object.processTypeDefinition(new_object)
+    self.objects[new_object.id] = new_object
+    self.world:newObjectType(new_object)
+  end
+
   self.map:afterLoad(old, new)
   self.world:afterLoad(old, new)
   self.ui:afterLoad(old, new)

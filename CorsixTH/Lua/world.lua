@@ -26,6 +26,7 @@ local ipairs, _G, table_remove
 dofile "entities/patient"
 dofile "entities/staff"
 dofile "entities/vip"
+dofile "entities/grimreaper"
 dofile "staff_profile"
 dofile "hospital"
 dofile "calls_dispatcher"
@@ -169,6 +170,10 @@ function World:World(app)
   }
 
   self:gameLog("Created game with savegame version " .. self.savegame_version .. ".")
+end
+
+function World:newObjectType(new_object)
+  self.object_types[new_object.id] = new_object
 end
 
 --! Register key shortcuts for controling the world (game speed, etc.)
@@ -532,6 +537,58 @@ function World:spawnPatient(hospital)
 
     return patient
   end
+end
+
+function World:checkHellDeathSpawnPoints(patient, hole_x, hole_y, grim_x, grim_y)
+  if self:getRoom(hole_x, hole_y) or self:getRoom(grim_x, grim_y) then
+    return false
+  end
+
+  local p_north_use_tile_usable = self:lavaHoleUseTileUsable(hole_x, hole_y, patient.tile_x, patient.tile_y, hole_x, hole_y - 1)
+  local p_west_use_tile_usable = self:lavaHoleUseTileUsable(hole_x, hole_y, patient.tile_x, patient.tile_y, hole_x - 1, hole_y)
+  local g_south_use_tile_usable = self:lavaHoleUseTileUsable(hole_x, hole_y, grim_x, grim_y, hole_x, hole_y + 1)
+  local g_east_use_tile_usable = self:lavaHoleUseTileUsable(hole_x, hole_y, grim_x, grim_y, hole_x + 1, hole_y)
+
+  return (p_north_use_tile_usable or p_west_use_tile_usable) and (g_south_use_tile_usable or g_east_use_tile_usable)
+end
+
+function World:lavaHoleUseTileUsable(hole_x, hole_y, start_x, start_y, use_tile_x, use_tile_y)
+  -- In room?
+  if self:getRoom(use_tile_x, use_tile_y) then
+    return false
+  end
+  -- Accessible?
+  local path_x_list, path_y_list = self:getPath(start_x, start_y, use_tile_x, use_tile_y)
+  if path_y_list == "no path" then
+    return false
+  else
+    for i, _ in ipairs(path_x_list) do
+      if path_x_list[i] == hole_x and path_y_list[i] == hole_y then
+        return false
+      end
+    end
+  end
+  return true
+end
+
+function World:spawnGrimReaperAndLavaHole(hospital, patient, hole_x, hole_y, grim_x, grim_y)
+  if not hospital then
+    hospital = self:getLocalPlayerHospital()
+  end
+
+  local lava_hole = self:newObject("gates_to_hell", hole_x, hole_y, "north")
+  local grim_reaper = self:newEntity("GrimReaper", 1660)
+  grim_reaper:setNextAction({name = "idle_spawn",
+                             count = 40,
+                             spawn_animation = 1660,
+                             point = { x = grim_x,
+                                       y = grim_y,
+                                       direction="east"}})
+  grim_reaper.patient = patient
+  grim_reaper:setHospital(hospital)
+  grim_reaper.lava_hole = lava_hole
+  patient.grim_reaper = grim_reaper
+  return grim_reaper
 end
 
 function World:spawnVIP(name)
