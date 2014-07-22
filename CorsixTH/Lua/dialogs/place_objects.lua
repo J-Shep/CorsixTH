@@ -714,6 +714,17 @@ function UIPlaceObjects:setBlueprintCell(x, y)
       self.object_footprint[i][1] = x
       self.object_footprint[i][2] = y
     end
+
+    local function finishSettingBluePrintCell()
+      if ATTACH_BLUEPRINT_TO_TILE then
+        self.object_anim:setTile(map, x, y)
+      end
+      self.object_anim:setPartialFlag(flag_altpal, not allgood)
+      self.object_slave_anim:setPartialFlag(flag_altpal, not allgood)
+      self.object_blueprint_good = allgood
+      self.ui:tutorialStep(1, allgood and 5 or 4, allgood and 4 or 5)
+    end
+
     -- Check 4a: For non "Side Objects" check that the pathfinding still works:
     if self.object_anim and object.class ~= "SideObject" then
       if allgood then
@@ -770,14 +781,9 @@ function UIPlaceObjects:setBlueprintCell(x, y)
         end
         setPassable(true)
       end
+
       -- After the 4th and final check above:
-      if ATTACH_BLUEPRINT_TO_TILE then
-        self.object_anim:setTile(map, x, y)
-      end
-      self.object_anim:setPartialFlag(flag_altpal, not allgood)
-      self.object_slave_anim:setPartialFlag(flag_altpal, not allgood)
-      self.object_blueprint_good = allgood
-      self.ui:tutorialStep(1, allgood and 5 or 4, allgood and 4 or 5)
+      finishSettingBluePrintCell()
 
     -- Check 4b: For side ojects, check that they will be passable:
     elseif object.class == "SideObject" then
@@ -801,14 +807,9 @@ function UIPlaceObjects:setBlueprintCell(x, y)
         flags[passable_flag] = true
         map:setCellFlags(x, y, flags)
       end
-      -- After the final check above for side objects:
-      if ATTACH_BLUEPRINT_TO_TILE then
-        self.object_anim:setTile(map, x, y)
-      end
-      self.object_anim:setPartialFlag(flag_altpal, not allgood)
-      self.object_slave_anim:setPartialFlag(flag_altpal, not allgood)
-      self.object_blueprint_good = allgood
-      self.ui:tutorialStep(1, allgood and 5 or 4, allgood and 4 or 5)
+
+      -- After the 4th and final check above:
+      finishSettingBluePrintCell()
     end
 
   else
