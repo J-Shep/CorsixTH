@@ -606,7 +606,7 @@ function UIPlaceObjects:setBlueprintCell(x, y)
       west = { x = -1, y = 0, buildable_flag = "buildableWest", passable_flag = "travelWest", needed_side = "need_west_side"}
       }
     
-    local function setAllGood(xy)
+    local function setAllGoodToFalse(xy)
       if xy.optional then
         opt_tiles_blocked = opt_tiles_blocked + 1
         if opt_tiles_blocked >= optional_tiles then
@@ -617,13 +617,18 @@ function UIPlaceObjects:setBlueprintCell(x, y)
       end
     end
     
+    -- For each footprint tile:
     for i, xy in ipairs(object_footprint) do
+      -- Relate its footprint coordinates with the desired spawn coordinates:
       local x = x + xy[1]
       local y = y + xy[2]
+      -- Check 1: Will its X and Y coordinates be within the map?:
+      -- If NOT:
       if x < 1 or x > w or y < 1 or y > h then
-        setAllGood(xy)
+        setAllGoodToFalse(xy)
         x = 0
         y = 0
+      -- Else setup this tile's flags:
       else
         local flag = "buildable"
         local good_tile = 24 + flag_alpha75
@@ -638,16 +643,22 @@ function UIPlaceObjects:setBlueprintCell(x, y)
           flag = direction_parameters[direction]["buildable_flag"]
           passable_flag = direction_parameters[direction]["passable_flag"]
         end
-        
+
+        -- Check 2: Check that the object is allowed to be placed in the desired room/corridor:
         local cell_flags = map:getCellFlags(x, y, flags)[flag]
         local is_object_allowed = false
+        -- If its a room object and would be placed in a room where it isn't allowed:
         if roomId and flags.roomId ~= roomId then
           is_object_allowed = false
+        -- If its a corridor object being placed in a corridor:
         elseif flags.roomId == 0 and object.corridor_object then
           is_object_allowed = true
           roomId = flags.roomId
+        -- If its a corridor object NOT being placed in a corridor:
         elseif flags.roomId == 0 and not object.corridor_object then
           is_object_allowed = false
+        -- Else check that the object is allowed to be placed in the desired room
+        -- because its in the room's additional/required objects table:
         else
           roomId = flags.roomId
           for _, o in pairs(world.rooms[roomId].room_info.objects_additional) do
@@ -663,7 +674,7 @@ function UIPlaceObjects:setBlueprintCell(x, y)
             end
           end
         end
-        
+
         local function isTileValid(x, y, complete_cell, flags, flag_name, need_side)        
           if complete_cell or need_side then
             return flags[flag_name]
@@ -675,8 +686,10 @@ function UIPlaceObjects:setBlueprintCell(x, y)
           end 
           return true
         end
-        
+
         if cell_flags and not xy.only_side then
+          -- Check 3: For non "only_side" objects, check that the foot print tile is valid for all
+          -- of its direction parameters:
           for _, value in pairs(direction_parameters) do
             local x1, y1 = xy[1] + value["x"], xy[2] + value["y"]
             if not isTileValid(x1, y1, xy.complete_cell, flags, value["buildable_flag"], xy[value["needed_side"]]) then
@@ -685,7 +698,8 @@ function UIPlaceObjects:setBlueprintCell(x, y)
             end
           end
         end 
-        
+
+        -- If this footprint tile will have a blueprint rendered on it:
         if cell_flags and is_object_allowed then
           if not xy.invisible then
             map:setCell(x, y, 4, good_tile)
@@ -694,12 +708,13 @@ function UIPlaceObjects:setBlueprintCell(x, y)
           if not xy.invisible then
             map:setCell(x, y, 4, bad_tile)
           end
-          setAllGood(xy)
+          setAllGoodToFalse(xy)
         end
       end
       self.object_footprint[i][1] = x
       self.object_footprint[i][2] = y
     end
+    -- Check 4a: For non "Side Objects" check that the pathfinding still works:
     if self.object_anim and object.class ~= "SideObject" then
       if allgood then
         -- Check that pathfinding still works, i.e. that placing the object
@@ -755,6 +770,7 @@ function UIPlaceObjects:setBlueprintCell(x, y)
         end
         setPassable(true)
       end
+      -- After the 4th and final check above:
       if ATTACH_BLUEPRINT_TO_TILE then
         self.object_anim:setTile(map, x, y)
       end
@@ -762,6 +778,8 @@ function UIPlaceObjects:setBlueprintCell(x, y)
       self.object_slave_anim:setPartialFlag(flag_altpal, not allgood)
       self.object_blueprint_good = allgood
       self.ui:tutorialStep(1, allgood and 5 or 4, allgood and 4 or 5)
+
+    -- Check 4b: For side ojects, check that they will be passable:
     elseif object.class == "SideObject" then
       if map:getCellFlags(x, y)[passable_flag] == true then
         local checked_x, checked_y = x, y
@@ -770,7 +788,7 @@ function UIPlaceObjects:setBlueprintCell(x, y)
         else 
           checked_x = checked_x + (passable_flag == "travelEast" and 1 or -1) 
         end
-    
+
         flags = {}
         flags[passable_flag] = false
         map:setCellFlags(x, y, flags)
@@ -783,6 +801,7 @@ function UIPlaceObjects:setBlueprintCell(x, y)
         flags[passable_flag] = true
         map:setCellFlags(x, y, flags)
       end
+      -- After the final check above for side objects:
       if ATTACH_BLUEPRINT_TO_TILE then
         self.object_anim:setTile(map, x, y)
       end
@@ -791,7 +810,7 @@ function UIPlaceObjects:setBlueprintCell(x, y)
       self.object_blueprint_good = allgood
       self.ui:tutorialStep(1, allgood and 5 or 4, allgood and 4 or 5)
     end
-        
+
   else
     self.object_footprint = {}
   end
