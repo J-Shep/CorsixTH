@@ -69,6 +69,8 @@ function GameUI:GameUI(app, local_hospital)
 
   self.momentum = app.config.scrolling_momentum
   self.current_momentum = {x = 0.0, y = 0.0, z = 0.0}
+
+  self.speed_up_key_pressed = false
 end
 
 function GameUI:setupGlobalKeyHandlers()
@@ -219,8 +221,13 @@ function GameUI:updateKeyScroll()
   end
 end
 
+function GameUI:isSpeedUpKeyPressed()
+  return self.speed_up_key_pressed
+end
+
 function GameUI:keySpeedUp()
   if self.key_codes[122] then
+    self.speed_up_key_pressed = true
     self.app.world:speedUp()
   end
 end
@@ -253,9 +260,11 @@ function GameUI:onKeyUp(code)
   if scroll_keys[key] then
     self:updateKeyScroll()
     return
-  end
-  if self.app.world:isCurrentSpeed("Speed Up")  then
-    self.app.world:previousSpeed()
+  elseif key == "z" then
+    self.speed_up_key_pressed = false
+    if self.app.world:isCurrentSpeed("Speed Up") then
+      self.app.world:previousSpeed()
+    end
   end
   if self.transparent_walls then
     self:removeTransparentWalls()

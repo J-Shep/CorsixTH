@@ -972,7 +972,11 @@ function World:pauseOrUnpause()
   if not self:isCurrentSpeed("Pause") then
     self:setSpeed("Pause")
   elseif self.prev_speed then
-    self:setSpeed(self.prev_speed)
+    if TheApp.ui:isSpeedUpKeyPressed() then
+      self:setSpeed("Speed Up")
+    else
+      self:setSpeed(self.prev_speed)
+    end
   end
 end
 
