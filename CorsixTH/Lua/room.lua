@@ -784,10 +784,28 @@ end
 
 -- Tells a humanoid in the room to leave it. This can be overridden for special
 -- handling, e.g. if the humanoid needs to change before leaving the room.
-function Room:makeHumanoidLeave(patient)
-  local leave = self:createLeaveAction()
-  leave.must_happen = true
-  patient:setNextAction(leave)
+function Room:makeHumanoidLeave(humanoid)
+  if not humanoid:isLeaving() then
+    local redress_action_queued = false
+    if humanoid.action_queue[1].name == "use_screen" then
+      if not humanoid.action_queue[1].is_surgical and not string.find(humanoid.action_queue[1].class_before_change, "Stripped") then
+        local screen, sx, sy = self.world:findObjectNear(humanoid, "screen")
+        humanoid.action_queue[1].disable_after_use = true
+        humanoid:setNextAction({name = "use_screen",
+                               object = screen,
+                               must_happen = true,
+                               is_leaving = true})
+        redress_action_queued = true
+      end
+    end
+    local leave = self:createLeaveAction()
+    leave.must_happen = true
+    if redress_action_queued then
+      humanoid:queueAction(leave)
+    else
+      humanoid:setNextAction(leave)
+    end
+  end
 end
 
 function Room:deactivate()

@@ -97,9 +97,10 @@ function PsychRoom:commandEnteringPatient(patient)
       if patient.diagnosed and patient.humanoid_class == "Elvis Patient" then
         -- Diagnosed patients (Elvis) need to change clothes
         obj, ox, oy = self.world:findObjectNear(patient, "screen")
-        patient:walkTo(ox, oy)
+        patient:walkTo(ox, oy, true, true)
         patient:queueAction{
           name = "use_screen",
+          is_leaving = true,
           object = obj,
           after_use = --[[persistable:psych_screen_after_use]] function()
             self:dealtWithPatient(patient)

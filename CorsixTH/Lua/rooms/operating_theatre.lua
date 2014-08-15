@@ -265,8 +265,8 @@ function OperatingTheatreRoom:commandEnteringPatient(patient)
 
   -- Patient walk to the side of the operating table
   ox, oy = obj:getSecondaryUsageTile()
-  patient:queueAction{name = "walk", x = ox, y = oy, must_happen = true, no_truncate = true}
-  patient:queueAction{name = "idle", loop_callback = operation_standby, must_happen = true}
+  patient:queueAction{name = "walk", x = ox, y = oy, must_happen = true, no_truncate = true, is_leaving = true}
+  patient:queueAction{name = "idle", loop_callback = operation_standby, must_happen = true, is_leaving = true}
 
   -- Patient changes out of the gown afterwards
   patient:queueAction{
@@ -274,9 +274,10 @@ function OperatingTheatreRoom:commandEnteringPatient(patient)
     x = sx,
     y = sy,
     must_happen = true,
+    is_leaving = true,
     no_truncate = true,
   }
-  patient:queueAction{name = "use_screen", object = screen, must_happen = true}
+  patient:queueAction{name = "use_screen", object = screen, must_happen = true, is_leaving = true}
 
   -- Meanwhile, second surgeon walks over to other side of operating table
   obj, ox, oy = self.world:findObjectNear(surgeon1, "operating_table_b")

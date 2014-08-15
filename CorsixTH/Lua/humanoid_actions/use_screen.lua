@@ -25,7 +25,8 @@ local finish = permanent"action_use_screen_finish"( function(humanoid)
   local offset = screen.object_type.orientations[screen.direction].use_position
   humanoid:setTile(screen.tile_x + offset[1], screen.tile_y + offset[2])
   local after_use = humanoid.action_queue[1].after_use
-  if after_use then
+  local disable_after_use = humanoid.action_queue[1].disable_after_use
+  if not disable_after_use and after_use then
     after_use()
   end
   humanoid:finishAction()
@@ -84,8 +85,10 @@ local surgical_state = permanent"action_use_screen_surgical_state"( function(hum
 end)
 
 local function action_use_screen_start(action, humanoid)
-  local screen = action.object
+  humanoid.action_queue[1].class_before_change = humanoid.humanoid_class
+  humanoid.action_queue[1].is_surgical = not not action.object.num_green_outfits
   local class = humanoid.humanoid_class
+  local screen = action.object
   local anim, when_done
   local is_surgical = not not screen.num_green_outfits
   local change_to = math.random(1, 3)

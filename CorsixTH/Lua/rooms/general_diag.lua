@@ -90,12 +90,14 @@ function GeneralDiagRoom:commandEnteringPatient(patient)
         x = sx,
         y = sy,
         must_happen = true,
+        is_leaving = true,
         no_truncate = true,
       }
       patient:queueAction{
         name = "use_screen",
         object = screen,
         must_happen = true,
+        is_leaving = true,
         after_use = --[[persistable:general_diag_screen_after_use2]] function()
           if #patient.action_queue == 1 then
             self:dealtWithPatient(patient)

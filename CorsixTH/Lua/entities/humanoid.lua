@@ -697,12 +697,14 @@ end
 -- tile to walk to.
 --!param must_happen (boolean, nil) If true, then the walk action will not be
 -- interrupted.
-function Humanoid:walkTo(tile_x, tile_y, must_happen)
+--!param is_leaving (boolean, nil) If true, this walking action is a leaving room action.
+function Humanoid:walkTo(tile_x, tile_y, must_happen, is_leaving)
   self:setNextAction {
     name = "walk",
     x = tile_x,
     y = tile_y,
     must_happen = must_happen,
+    is_leaving = is_leaving
   }
 end
 

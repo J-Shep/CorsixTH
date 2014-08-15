@@ -55,18 +55,6 @@ function CardiogramRoom:commandEnteringPatient(patient)
     object = screen,
     after_use = --[[persistable:cardiogram_screen_after_use1]] function()
       local staff = self.staff_member
-      if not staff or patient.going_home then
-        -- If, by some fluke, the staff member left the room while the
-        -- patient used the screen, then the patient should get changed
-        -- again (they will already have been instructed to leave by the
-        -- staff leaving).
-        patient:queueAction({
-          name = "use_screen",
-          object = screen,
-          must_happen = true,
-        }, 1)
-        return
-      end
       local cardio, cx, cy = self.world:findObjectNear(patient, "cardio")
       staff:walkTo(cardio:getSecondaryUsageTile())
       local staff_idle = {name = "idle"}
@@ -112,12 +100,14 @@ function CardiogramRoom:commandEnteringPatient(patient)
         x = sx,
         y = sy,
         must_happen = true,
+        is_leaving = true,
         no_truncate = true,
       }
       patient:queueAction{
         name = "use_screen",
         object = screen,
         must_happen = true,
+        is_leaving = true,
         after_use = --[[persistable:cardiogram_screen_after_use2]] function()
           if #patient.action_queue == 1 then
             self:dealtWithPatient(patient)
