@@ -23,6 +23,10 @@ SOFTWARE. --]]
 --  class "Name"
 -- OR
 --  class "Name" (SuperclassName)
+--  
+--  Please include these 2 statements so that Eclipse can list functions:
+--- @type Name --Comment tag which should be prefixed by: ---
+--  local Name = _G["Name"]
 --
 --  function Name:Name(arguments)
 --    self:SuperclassName(arguments) -- required when there is a superclass
