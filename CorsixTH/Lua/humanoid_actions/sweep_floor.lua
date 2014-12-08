@@ -37,9 +37,9 @@ local remove_litter = permanent"action_sweep_floor_remove_litter"( function(huma
   humanoid.user_of = nil
   humanoid:setTimer(humanoid.world:getAnimLength(animation_numbers[2]) * 2, finish)
   local hospital = humanoid.world.hospitals[1]
-  local taskIndex = hospital:getIndexOfTask(humanoid.tile_x, humanoid.tile_y, "cleaning")
-  if taskIndex ~= -1 then
-  hospital:removeHandymanTask(taskIndex, "cleaning")
+  local task_index = hospital:getIndexOfTask(humanoid.tile_x, humanoid.tile_y, "cleaning")
+  if task_index ~= -1 then
+  hospital:removeHandymanTask(task_index, "cleaning")
   end
 end)
 

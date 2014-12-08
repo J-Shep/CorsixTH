@@ -905,39 +905,39 @@ end
 function Staff:searchForHandymanTask()
   self.task = nil
   local nr = math.random()
-  local task, task2, task3
-  local assignedTask = false
+  local task, task_2, task_3
+  local assigned_task = false
   if nr < self.attributes["cleaning"] then
-    task, task2, task3 = "cleaning", "watering", "repairing"
+    task, task_2, task_3 = "cleaning", "watering", "repairing"
   elseif nr < self.attributes["cleaning"] + self.attributes["watering"] then
-    task, task2, task3 = "watering", "cleaning", "repairing"
+    task, task_2, task_3 = "watering", "cleaning", "repairing"
   else
-    task, task2, task3 = "repairing", "watering", "cleaning"
+    task, task_2, task_3 = "repairing", "watering", "cleaning"
   end
   local index = self.hospital:searchForHandymanTask(self, task)
   if index ~= -1 then
     self:assignHandymanTask(index, task)
-    assignedTask = true
+    assigned_task = true
   else
     if self.attributes[task] < 1 then
-      local sum = self.attributes[task2] + self.attributes[task3]
-      if math.random(0, sum * 100) > self.attributes[task2] * 100 then
-        task2, task3 =  task3, task2
+      local sum = self.attributes[task_2] + self.attributes[task_3]
+      if math.random(0, sum * 100) > self.attributes[task_2] * 100 then
+        task_2, task_3 =  task_3, task_2
       end
-      index = self.hospital:searchForHandymanTask(self, task2)
+      index = self.hospital:searchForHandymanTask(self, task_2)
       if index ~= -1 then
-        self:assignHandymanTask(index, task2)
-        assignedTask = true
-      elseif self.attributes[task3] > 0 then
-        index = self.hospital:searchForHandymanTask(self, task3)
+        self:assignHandymanTask(index, task_2)
+        assigned_task = true
+      elseif self.attributes[task_3] > 0 then
+        index = self.hospital:searchForHandymanTask(self, task_3)
         if index ~= -1 then
-          self:assignHandymanTask(index, task3)
-          assignedTask = true
+          self:assignHandymanTask(index, task_3)
+          assigned_task = true
         end
       end
     end
   end
-  if assignedTask == false then
+  if assigned_task == false then
     -- Make sure that the handyman isn't meandering already.
     for i, action in ipairs(self.action_queue) do
       if action.name == "meander" then
@@ -949,7 +949,7 @@ function Staff:searchForHandymanTask()
     end
     self:queueAction({name = "meander"})
   end
-  return assignedTask
+  return assigned_task
 end
 
 function Staff:assignHandymanTask(taskIndex, taskType)

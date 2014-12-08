@@ -967,12 +967,12 @@ function World:setSpeed(speed)
     self.user_actions_allowed = true
   end
 
-  local currentSpeed = self:getCurrentSpeed()
-  if currentSpeed ~= "Pause" and currentSpeed ~= "Speed Up" then
+  local current_speed = self:getCurrentSpeed()
+  if current_speed ~= "Pause" and current_speed ~= "Speed Up" then
     self.prev_speed = self:getCurrentSpeed()
   end
 
-  local was_paused = currentSpeed == "Pause"
+  local was_paused = current_speed == "Pause"
   local numerator, denominator = unpack(tick_rates[speed])
   self.hours_per_tick = numerator
   self.tick_rate = denominator
@@ -2336,13 +2336,13 @@ function World:afterLoad(old, new)
 
     -- Add room values
     for _, room in pairs(self.rooms) do
-      local valueChange = room.room_info.build_cost
+      local value_change = room.room_info.build_cost
 
       -- Subtract values of objects in rooms to avoid calculating those object values twice
       for obj, num in pairs(room.room_info.objects_needed) do
-        valueChange = valueChange - num * TheApp.objects[obj].build_cost
+        value_change = value_change - num * TheApp.objects[obj].build_cost
       end
-      value = value + valueChange
+      value = value + value_change
     end
 
     -- Add up all object values

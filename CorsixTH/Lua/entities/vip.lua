@@ -73,20 +73,20 @@ function Vip:tickDay()
 
   self.world:findObjectNear(self, "litter", 8, function(x, y)
     local litter = self.world:getObject(x, y, "litter")
-    local alreadyFound = false
+    local already_found = false
   if not litter then
     return
   end
     for i=1,(self.num_vomit_noninducing + self.num_vomit_inducing) do
       if self.found_vomit[i] == litter then
-        alreadyFound = true
+        already_found = true
         break
       end
     end
 
     self.found_vomit[(self.num_vomit_noninducing + self.num_vomit_inducing + 1)] = litter
 
-    if not alreadyFound then
+    if not already_found then
       if litter:anyLitter() then
         self.num_vomit_noninducing = self.num_vomit_noninducing + 1
       else
@@ -257,91 +257,91 @@ end
 
 function Vip:setVIPRating()
   --check the visitor to patient death ratio
-  local deathDiff = self.hospital.num_deaths - self.enter_deaths
-  local numberVisitorsDiff = self.hospital.num_visitors - self.enter_visitors
-  if deathDiff == 0 then
-    if numberVisitorsDiff ~= 0 then --if there have been no new patients, no +/- points
+  local death_diff = self.hospital.num_deaths - self.enter_deaths
+  local number_visitors_diff = self.hospital.num_visitors - self.enter_visitors
+  if death_diff == 0 then
+    if number_visitors_diff ~= 0 then --if there have been no new patients, no +/- points
       self.vip_rating = self.vip_rating + 20
     end
   else
-    local deathRatio = numberVisitorsDiff / deathDiff
-    if deathRatio > 12 then
+    local death_ratio = number_visitors_diff / death_diff
+    if death_ratio > 12 then
       self.vip_rating = self.vip_rating + 10
-    elseif deathRatio >= 8 then
+    elseif death_ratio >= 8 then
       self.vip_rating = self.vip_rating + 5
-    elseif deathRatio >= 2 and deathRatio <= 4 then
+    elseif death_ratio >= 2 and death_ratio <= 4 then
       self.vip_rating = self.vip_rating - 10
-    elseif deathRatio < 2 then
+    elseif death_ratio < 2 then
       self.vip_rating = self.vip_rating - 20
     end
   end
 
   --check the visitor to patient cure ratio
-  local cureDiff = self.hospital.num_cured - self.enter_cures
-  local numberVisitorsDiff = self.hospital.num_visitors - self.enter_visitors
-  if cureDiff == 0 then
-    if numberVisitorsDiff ~= 0 then --if there have been no new patients, no +/- points
+  local cure_diff = self.hospital.num_cured - self.enter_cures
+  local number_visitors_diff = self.hospital.num_visitors - self.enter_visitors
+  if cure_diff == 0 then
+    if number_visitors_diff ~= 0 then --if there have been no new patients, no +/- points
       self.vip_rating = self.vip_rating - 10
     end
   else
-    local cureRatio = numberVisitorsDiff / cureDiff
-    if cureRatio > 12 then
+    local cure_ratio = number_visitors_diff / cure_diff
+    if cure_ratio > 12 then
       self.vip_rating = self.vip_rating - 10
-    elseif cureRatio >= 10 then
+    elseif cure_ratio >= 10 then
       self.vip_rating = self.vip_rating - 5
-    elseif cureRatio >= 3 and cureRatio <= 6 then
+    elseif cure_ratio >= 3 and cure_ratio <= 6 then
       self.vip_rating = self.vip_rating + 10
-    elseif cureRatio < 3 then
+    elseif cure_ratio < 3 then
       self.vip_rating = self.vip_rating + 20
     end
   end
 
   -- check for the average queue length
-  local queueCounter = 0
+  local queue_counter = 0
   for _, room in pairs(self.world.rooms) do
     -- this can be nil if there has been a room explosion
     if room.door.queue then
-      queueCounter = queueCounter + room.door.queue:size()
+      queue_counter = queue_counter + room.door.queue:size()
     end
   end
 
-  if queueCounter == 0 then
+  if queue_counter == 0 then
     self.vip_rating = self.vip_rating + 6
   else
-    local queueRatio = queueCounter / #self.world.rooms
-    if queueRatio < 2 then
+    local queue_ratio = queue_counter / #self.world.rooms
+    if queue_ratio < 2 then
       self.vip_rating = self.vip_rating + 6
     else
-      if queueRatio >= 3 and queueRatio <=5 then
+      if queue_ratio >= 3 and queue_ratio <=5 then
         self.vip_rating = self.vip_rating + 3
-      elseif queueRatio >= 9 and queueRatio <=11 then
+      elseif queue_ratio >= 9 and queue_ratio <=11 then
         self.vip_rating = self.vip_rating - 3
-      elseif queueRatio > 11 then
+      elseif queue_ratio > 11 then
         self.vip_rating = self.vip_rating - 6
       end
     end
   end
 
   -- now we check for toilet presence
-  local toiletsFound = 0
+  local toilets_found = 0
   for i, room in pairs(self.world.rooms) do
     if room.room_info.id == "toilets" then
       for object, value in pairs(room.objects) do
         if object.object_type.id == "loo" then
-          toiletsFound = toiletsFound + 1
+          toilets_found = toilets_found + 1
         end
       end
     end
   end
-  if toiletsFound == 0 then
+  if toilets_found == 0 then
     self.vip_rating = self.vip_rating - 6
   else
-    local patientToToilet = #self.hospital.patients / toiletsFound
-    if patientToToilet <= 10 then
+    local patient_to_toilet = #self.hospital.patients / toilets_found
+    if patient_to_toilet <= 10 then
       self.vip_rating = self.vip_rating + 6
-    elseif patientToToilet <= 20 then
+    elseif patient_to_toilet <= 20 then
       self.vip_rating = self.vip_rating + 3
-    elseif patientToToilet > 40 then
+    elseif patient_to_toilet > 40 then
       self.vip_rating = self.vip_rating - 3
     end
   end
@@ -379,8 +379,8 @@ function Vip:setVIPRating()
   end
 
   -- if there were explosions, hit the user hard
-  local explosionsDiff =  self.hospital.num_explosions - self.enter_explosions
-  if explosionsDiff > 0 then
+  local explosions_diff =  self.hospital.num_explosions - self.enter_explosions
+  if explosions_diff > 0 then
     self.vip_rating = self.vip_rating - 70
   end
 
@@ -397,30 +397,30 @@ function Vip:setVIPRating()
 
   -- check the seating : standing ratio of waiting patients
   -- find all the patients who are currently waiting around
-  local numberSitting, numberStanding = self.hospital:countSittingStanding()
-  if numberSitting >= numberStanding then
+  local number_sitting, number_standing = self.hospital:countSittingStanding()
+  if number_sitting >= number_standing then
     self.vip_rating = self.vip_rating + 4
   else
     self.vip_rating = self.vip_rating - 4
   end
 
   -- check average patient thirst
-  local totalThirst = 0
+  local total_thirst = 0
   for _, patient in ipairs(self.hospital.patients) do
     if patient.attributes["thirst"] then
-      totalThirst = totalThirst + patient.attributes["thirst"]
+      total_thirst = total_thirst + patient.attributes["thirst"]
     end
   end
 
   if #self.hospital.patients ~= 0 then
-    local averageThirst = totalThirst / #self.hospital.patients
-    if averageThirst >= 0.80 then
+    local average_thirst = total_thirst / #self.hospital.patients
+    if average_thirst >= 0.80 then
       self.vip_rating = self.vip_rating + 3
-    elseif averageThirst >= 0.60 then
+    elseif average_thirst >= 0.60 then
       self.vip_rating = self.vip_rating + 1
-    elseif averageThirst >= 0.20 and averageThirst < 0.40 then
+    elseif average_thirst >= 0.20 and average_thirst < 0.40 then
       self.vip_rating = self.vip_rating - 1
-    elseif averageThirst < 0.20 then
+    elseif average_thirst < 0.20 then
       self.vip_rating = self.vip_rating - 5
     end
   end
@@ -430,18 +430,18 @@ function Vip:setVIPRating()
   end
 
   -- check average patient happiness
-  local totalHappiness = 0
+  local total_happiness = 0
   for _, patient in ipairs(self.hospital.patients) do
-    totalHappiness = totalHappiness + patient.attributes["happiness"]
+    total_happiness = total_happiness + patient.attributes["happiness"]
   end
 
   if #self.hospital.patients ~= 0 then
-    local averageHappiness = totalHappiness / #self.hospital.patients
-    if averageHappiness >= 0.80 then
+    local average_happiness = total_happiness / #self.hospital.patients
+    if average_happiness >= 0.80 then
       self.vip_rating = self.vip_rating + 10
-    elseif averageHappiness >= 0.60 then
+    elseif average_happiness >= 0.60 then
       self.vip_rating = self.vip_rating + 5
-    elseif averageHappiness >= 0.20 and averageHappiness < 0.40 then
+    elseif average_happiness >= 0.20 and average_happiness < 0.40 then
       self.vip_rating = self.vip_rating - 5
     else
       self.vip_rating = self.vip_rating - 10
@@ -449,18 +449,18 @@ function Vip:setVIPRating()
   end
 
   -- check average staff happiness
-  local totalHappiness = 0
+  local total_happiness = 0
   for _, staff in ipairs(self.hospital.staff) do
-    totalHappiness = totalHappiness + staff.attributes["happiness"]
+    total_happiness = total_happiness + staff.attributes["happiness"]
   end
 
   if #self.hospital.staff ~= 0 then
-    local averageHappiness = totalHappiness / #self.hospital.staff
-    if averageHappiness >= 0.80 then
+    local average_happiness = total_happiness / #self.hospital.staff
+    if average_happiness >= 0.80 then
       self.vip_rating = self.vip_rating + 10
-    elseif averageHappiness >= 0.60 then
+    elseif average_happiness >= 0.60 then
       self.vip_rating = self.vip_rating + 5
-    elseif averageHappiness >= 0.20 and averageHappiness < 0.40 then
+    elseif average_happiness >= 0.20 and average_happiness < 0.40 then
       self.vip_rating = self.vip_rating - 5
     else
       self.vip_rating = self.vip_rating - 10

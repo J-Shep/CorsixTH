@@ -140,14 +140,14 @@ function UIEditRoom:abortRoom()
     -- TODO: Return also the cost for additional objects.
 
     -- Decrease the hospital value by the whole room build cost
-    local valueChange = progress[self.room.room_info].build_cost
+    local value_change = progress[self.room.room_info].build_cost
     for obj, num in pairs(self.room.room_info.objects_needed) do
       -- Get how much this item costs.
       local obj_cost = self.ui.hospital:getObjectBuildCost(obj)
       cost = cost - math.floor(obj_cost)/2
-      valueChange = valueChange - num * obj_cost
+      value_change = value_change - num * obj_cost
     end
-    self.ui.hospital:receiveMoney(cost, _S.transactions.sell_object, valueChange)
+    self.ui.hospital:receiveMoney(cost, _S.transactions.sell_object, value_change)
   end
   -- Close the dialog
   self:close()

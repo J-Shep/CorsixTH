@@ -82,11 +82,11 @@ function Machine:machineUsed(room)
   end
   self:updateDynamicInfo()
   local threshold = self.strength - self.times_used
-  local taskIndex = self.hospital:getIndexOfTask(self.tile_x, self.tile_y, "repairing")
+  local task_index = self.hospital:getIndexOfTask(self.tile_x, self.tile_y, "repairing")
 
   -- Too late it is about to explode
   if threshold < 1 then
-    self.hospital:removeHandymanTask(taskIndex, "repairing")
+    self.hospital:removeHandymanTask(task_index, "repairing")
     room:crashRoom()
     self:setCrashedAnimation()
     self.hover_cursor = nil
@@ -101,15 +101,15 @@ function Machine:machineUsed(room)
   elseif threshold < 4 then
     -- TODO: Smoke, up to three animations per machine
     -- i.e. < 4 one plume, < 3 two plumes or < 2 three plumes of smoke
-    if taskIndex == -1 then
+    if task_index == -1 then
       local call = self.world.dispatcher:callForRepair(self, true, false, true)
       self.hospital:addHandymanTask(self, "repairing", 2, self.tile_x, self.tile_y, call)
     else
-      self.hospital:modifyHandymanTaskPriority(taskIndex, 2, "repairing")
+      self.hospital:modifyHandymanTaskPriority(task_index, 2, "repairing")
     end
   elseif threshold < 6 then
     -- Not urgent
-    if taskIndex == -1 then
+    if task_index == -1 then
       local call = self.world.dispatcher:callForRepair(self)
       self.hospital:addHandymanTask(self, "repairing", 1, self.tile_x, self.tile_y, call)
     end
@@ -186,8 +186,8 @@ function Machine:machineRepaired(room)
   self.times_used = 0
   self:setRepairing(nil)
 
-  local taskIndex = self.hospital:getIndexOfTask(self.tile_x, self.tile_y, "repairing")
-  self.hospital:removeHandymanTask(taskIndex, "repairing")
+  local task_index = self.hospital:getIndexOfTask(self.tile_x, self.tile_y, "repairing")
+  self.hospital:removeHandymanTask(task_index, "repairing")
 end
 
 --! Tells the machine to start showing the icon that it needs repair.
@@ -289,8 +289,8 @@ function Machine:afterLoad(old, new)
   if old < 54 then
     local room = self:getRoom()
     if room.crashed then
-      local taskIndex = room.hospital:getIndexOfTask(self.tile_x, self.tile_y, "repairing")
-      room.hospital:removeHandymanTask(taskIndex, "repairing")
+      local task_index = room.hospital:getIndexOfTask(self.tile_x, self.tile_y, "repairing")
+      room.hospital:removeHandymanTask(task_index, "repairing")
     end
   end
   return Object.afterLoad(self, old, new)

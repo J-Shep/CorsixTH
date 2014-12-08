@@ -359,14 +359,14 @@ function Strings:setupAdviserMessage(messages)
     return val
   end
   -- Initial value
-  local adviserMessage = {
+  local adviser_message = {
     text = messages,
     table = prioTable,
     priority = prioTable._priority,
     format = formatFunc
   }
-  setmetatable(adviserMessage, {__index = indexFunc})
-  return adviserMessage
+  setmetatable(adviser_message, {__index = indexFunc})
+  return adviser_message
 end
 
 

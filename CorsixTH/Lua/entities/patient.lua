@@ -639,11 +639,11 @@ function Patient:tickDay()
   if self.vomit_anim and not self:getRoom() and not self.action_queue[1].is_leaving and not self.action_queue[1].is_entering then
     --Nausea level is based on health then proximity to vomit is used as a multiplier.
     --Only a patient with a health value of less than 0.8 can be the inital vomiter, however :)
-    local initialVomitMult = 0.002   --The initial chance of vomiting.
-    local proximityVomitMult = 1.5  --The multiplier used when in proximity to vomit.
-    local nausea = (1.0 - self.attributes["health"]) * initialVomitMult
-    local foundVomit = {}
-    local numVomit = 0
+    local initial_vomit_mult = 0.002   --The initial chance of vomiting.
+    local proximity_vomit_mult = 1.5  --The multiplier used when in proximity to vomit.
+    local nausea = (1.0 - self.attributes["health"]) * initial_vomit_mult
+    local found_vomit = {}
+    local num_vomit = 0
 
     self.world:findObjectNear(self, "litter", 2, function(x, y)
       local litter = self.world:getObject(x, y, "litter")
@@ -651,17 +651,17 @@ function Patient:tickDay()
     return
     end
       if litter:vomitInducing() then
-        local alreadyFound = false
-        for i=1,numVomit do
-          if foundVomit[i] == litter then
-            alreadyFound = true
+        local already_found = false
+        for i=1,num_vomit do
+          if found_vomit[i] == litter then
+            already_found = true
             break
           end
         end
 
-        if not alreadyFound then
-          numVomit = numVomit + 1
-          foundVomit[numVomit] = litter
+        if not already_found then
+          num_vomit = num_vomit + 1
+          found_vomit[num_vomit] = litter
         end
       end
       -- seeing litter will make you unhappy. If it is pee or puke it is worse
@@ -674,8 +674,8 @@ function Patient:tickDay()
     -- As we don't yet have rats, rat holes and dead rats the chances of vomitting are slim
     -- as a temp  fix for this I have added 0.5 to the < nausea equation,
     -- this may want adjusting or removing when the other factors are in the game MarkL
-    if self.attributes["health"] <= 0.8 or numVomit > 0 or self.attributes["happiness"] < 0.6 then
-      nausea = nausea * ((numVomit+1) * proximityVomitMult)
+    if self.attributes["health"] <= 0.8 or num_vomit > 0 or self.attributes["happiness"] < 0.6 then
+      nausea = nausea * ((num_vomit+1) * proximity_vomit_mult)
       if math.random() < nausea + 0.5 then
         self:vomit()
       end

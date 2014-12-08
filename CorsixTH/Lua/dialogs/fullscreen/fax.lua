@@ -42,11 +42,11 @@ function UIFax:UIFax(ui, icon)
     for i = 1, #choices do
       local y = orig_y + ((i-1) + (3-#choices)) * 48
       local choice = choices[i].choice
-      local additionalInfo = choices[i].additionalInfo
+      local additional_info = choices[i].additionalInfo
       -- NB: both nil and true result in enabled; also handle old "disabled" choice
       local enabled = (choices[i].enabled ~= false) and (choice ~= "disabled")
       local --[[persistable:fax_choice_button]] function callback()
-        self:choice(choice,additionalInfo)
+        self:choice(choice,additional_info)
       end
       self.choice_buttons[i] = self:addPanel(17, 492, y):makeButton(0, 0, 43, 43, 18, callback)
         :setDisabledSprite(19):enable(enabled)

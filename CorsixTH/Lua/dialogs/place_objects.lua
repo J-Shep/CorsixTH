@@ -593,10 +593,10 @@ function UIPlaceObjects:setBlueprintCell(x, y)
       end
     end
     local flags = {}
-    local allgood = true
+    local all_good = true
     local opt_tiles_blocked = 0
     local world = self.ui.app.world
-    local roomId = self.room and self.room.id
+    local room_id = self.room and self.room.id
     local passable_flag
     local direction = self.object_orientation
     local direction_parameters =  {
@@ -610,10 +610,10 @@ function UIPlaceObjects:setBlueprintCell(x, y)
       if xy.optional then
         opt_tiles_blocked = opt_tiles_blocked + 1
         if opt_tiles_blocked >= optional_tiles then
-          allgood = false
+          all_good = false
         end
       else
-        allgood = false
+        all_good = false
       end
     end
 
@@ -641,9 +641,9 @@ function UIPlaceObjects:setBlueprintCell(x, y)
         end
 
         -- Check 2: Is the tile in the object's allowed room?:
-        local result = world:willObjectsFootprintTileBeWithinItsAllowedRoomIfLocatedAt(x, y, object, roomId)
+        local result = world:willObjectsFootprintTileBeWithinItsAllowedRoomIfLocatedAt(x, y, object, room_id)
         local is_object_allowed = result.within_room
-        roomId = result.roomId
+        room_id = result.roomId
 
         -- Check 3: The footprint tile should either be buildable or passable, is it?:
         if not tile.only_side and is_object_allowed then
@@ -668,16 +668,16 @@ function UIPlaceObjects:setBlueprintCell(x, y)
       self.object_footprint[i][2] = y
     end
     if self.object_anim and object.class ~= "SideObject" then
-      if allgood then
-        allgood = not world:wouldNonSideObjectBreakPathfindingIfSpawnedAt(x, y, object, self.object_orientation, roomId)
+      if all_good then
+        all_good = not world:wouldNonSideObjectBreakPathfindingIfSpawnedAt(x, y, object, self.object_orientation, room_id)
  	    end
       if ATTACH_BLUEPRINT_TO_TILE then
         self.object_anim:setTile(map, x, y)
       end
-      self.object_anim:setPartialFlag(flag_altpal, not allgood)
-      self.object_slave_anim:setPartialFlag(flag_altpal, not allgood)
-      self.object_blueprint_good = allgood
-      self.ui:tutorialStep(1, allgood and 5 or 4, allgood and 4 or 5)
+      self.object_anim:setPartialFlag(flag_altpal, not all_good)
+      self.object_slave_anim:setPartialFlag(flag_altpal, not all_good)
+      self.object_blueprint_good = all_good
+      self.ui:tutorialStep(1, all_good and 5 or 4, all_good and 4 or 5)
     elseif object.class == "SideObject" then
       if map:getCellFlags(x, y)[passable_flag] == true then
         local checked_x, checked_y = x, y
@@ -693,7 +693,7 @@ function UIPlaceObjects:setBlueprintCell(x, y)
         if not world.pathfinder:findDistance(x, y, checked_x, checked_y) then
           --we need to check if the failure to get the distance is due to the presence of an object in the adjacent tile
           if map:getCellFlags(checked_x, checked_y)["passable"] then
-            allgood = false
+            all_good = false
           end
         end
         flags[passable_flag] = true
@@ -702,10 +702,10 @@ function UIPlaceObjects:setBlueprintCell(x, y)
       if ATTACH_BLUEPRINT_TO_TILE then
         self.object_anim:setTile(map, x, y)
       end
-      self.object_anim:setPartialFlag(flag_altpal, not allgood)
-      self.object_slave_anim:setPartialFlag(flag_altpal, not allgood)
-      self.object_blueprint_good = allgood
-      self.ui:tutorialStep(1, allgood and 5 or 4, allgood and 4 or 5)
+      self.object_anim:setPartialFlag(flag_altpal, not all_good)
+      self.object_slave_anim:setPartialFlag(flag_altpal, not all_good)
+      self.object_blueprint_good = all_good
+      self.ui:tutorialStep(1, all_good and 5 or 4, all_good and 4 or 5)
     end
 
   else

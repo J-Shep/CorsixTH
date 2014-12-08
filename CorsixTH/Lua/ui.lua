@@ -659,12 +659,12 @@ function UI:onKeyDown(code, rawchar)
     key_down = string.char(code)
   end
 
-  local keyHandlers = self.key_handlers[key_down]
-  if keyHandlers then
+  local key_handlers = self.key_handlers[key_down]
+  if key_handlers then
     -- Iterate over key handlers and call each one whose modifier(s) are pressed
     -- NB: Only if the exact correct modifiers are pressed will the shortcut get processed.
     local handled = false
-    for _, handler in ipairs(keyHandlers) do
+    for _, handler in ipairs(key_handlers) do
       if compare_tables(handler.modifiers, self.buttons_down) then
         handler.callback(handler.window, unpack(handler))
         handled = true

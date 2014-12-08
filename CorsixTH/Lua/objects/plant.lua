@@ -130,9 +130,9 @@ function Plant:restoreToFullHealth()
   self:setTimer((self.direction == "south" or self.direction == "east") and 35 or 20, plant_restoring)
   self.days_left = days_between_states
 
-  local taskIndex = self.hospital:getIndexOfTask(self.tile_x, self.tile_y, "watering")
-  if taskIndex ~= -1 then
-  self.hospital:removeHandymanTask(taskIndex, "watering")
+  local task_index = self.hospital:getIndexOfTask(self.tile_x, self.tile_y, "watering")
+  if task_index ~= -1 then
+    self.hospital:removeHandymanTask(task_index, "watering")
   end
 end
 

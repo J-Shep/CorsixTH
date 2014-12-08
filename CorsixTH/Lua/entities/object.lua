@@ -408,7 +408,7 @@ function Object:setTile(x, y)
       local optional_found = false
       local flags = {}
       local room = self.world:getRoom(x, y)
-      local roomId = room and room.id
+      local room_id = room and room.id
       local next_tile_x, next_tile_y = x,y
       local passable_flag
 
@@ -432,7 +432,7 @@ function Object:setTile(x, y)
 
             local cell_flags = map:getCellFlags(lx, ly, flags)[flag]
             local is_object_allowed = true
-            if roomId and flags.roomId ~= roomId then
+            if room_id and flags.roomId ~= room_id then
               is_object_allowed = false
             elseif xy.only_passable and not self.world.pathfinder:isReachableFromHospital(lx, ly) then
               is_object_allowed = false
@@ -648,13 +648,13 @@ function Object:onClick(ui, button, data)
     end
 
     if self.object_type.class == "Plant" or self.object_type.class == "Machine" then
-      local taskType = "watering"
+      local task_type = "watering"
       if self.object_type.class == "Machine" then
-        taskType = "repairing"
+        task_type = "repairing"
       end
-      local index = self.hospital:getIndexOfTask(self.tile_x, self.tile_y, taskType)
+      local index = self.hospital:getIndexOfTask(self.tile_x, self.tile_y, task_type)
       if index ~= -1 then
-        self.hospital:removeHandymanTask(index, taskType)
+        self.hospital:removeHandymanTask(index, task_type)
       end
     end
 

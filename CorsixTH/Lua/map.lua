@@ -23,12 +23,12 @@ class "Map"
 local pathsep = package.config:sub(1, 1)
 local math_floor, tostring, table_concat
     = math.floor, tostring, table.concat
-local thMap = require"TH".map
+local th_map = require"TH".map
 
 function Map:Map(app)
   self.width = false
   self.height = false
-  self.th = thMap()
+  self.th = th_map()
   self.app = app
   self.debug_text = false
   self.debug_flags = false
@@ -367,15 +367,15 @@ function Map:loadDebugText(base_offset, xy_offset, first, last, bits_)
     self.updateDebugOverlay = self.updateDebugOverlayHeat
     self:updateDebugOverlay()
   else
-    local thData = self:getRawData()
+    local th_data = self:getRawData()
     for x = 1, self.width do
       for y = 1, self.height do
         local xy = (y - 1) * self.width + x - 1
         local offset = base_offset + xy * xy_offset
         if bits_ then
-          self:setDebugText(x, y, bits(thData:byte(offset + first, offset + last)))
+          self:setDebugText(x, y, bits(th_data:byte(offset + first, offset + last)))
         else
-          self:setDebugText(x, y, thData:byte(offset + first, offset + last))
+          self:setDebugText(x, y, th_data:byte(offset + first, offset + last))
         end
       end
     end
@@ -435,33 +435,33 @@ function Map:draw(canvas, sx, sy, sw, sh, dx, dy)
 
   -- Draw any debug overlays
   if self.debug_font and (self.debug_text or self.debug_flags) then
-    local startX = 0
-    local startY = math_floor((sy - 32) / 16)
-    if startY < 0 then
-      startY = 0
-    elseif startY >= self.height then
-      startX = startY - self.height + 1
-      startY = self.height - 1
-      if startX >= self.width then
-        startX = self.width - 1
+    local start_x = 0
+    local start_y = math_floor((sy - 32) / 16)
+    if start_y < 0 then
+      start_y = 0
+    elseif start_y >= self.height then
+      start_x = start_y - self.height + 1
+      start_y = self.height - 1
+      if start_x >= self.width then
+        start_x = self.width - 1
       end
     end
-    local baseX = startX
-    local baseY = startY
+    local base_x = start_x
+    local base_y = start_y
     while true do
-      local x = baseX
-      local y = baseY
-      local screenX = 32 * (x - y) - sx
-      local screenY = 16 * (x + y) - sy
-      if screenY >= sh + 70 then
+      local x = base_x
+      local y = base_y
+      local screen_x = 32 * (x - y) - sx
+      local screen_y = 16 * (x + y) - sy
+      if screen_y >= sh + 70 then
         break
-      elseif screenY > -32 then
+      elseif screen_y > -32 then
         repeat
-          if screenX < -32 then
-          elseif screenX < sw + 32 then
+          if screen_x < -32 then
+          elseif screen_x < sw + 32 then
             local xy = y * self.width + x
-            local x = dx + screenX - 32
-            local y = dy + screenY
+            local x = dx + screen_x - 32
+            local y = dy + screen_y
             if self.debug_flags then
               local flags = self.debug_flags[xy]
               if flags.passable then
@@ -503,16 +503,16 @@ function Map:draw(canvas, sx, sy, sw, sh, dx, dy)
           end
           x = x + 1
           y = y - 1
-          screenX = screenX + 64
+          screen_x = screen_x + 64
         until y < 0 or x >= self.width
       end
-      if baseY == self.height - 1 then
-        baseX = baseX + 1
-        if baseX == self.width then
+      if base_y == self.height - 1 then
+        base_x = base_x + 1
+        if base_x == self.width then
           break
         end
       else
-        baseY = baseY + 1
+        base_y = base_y + 1
       end
     end
   end

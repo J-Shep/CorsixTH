@@ -135,8 +135,8 @@ function Litter:afterLoad(old, new)
   if old < 54 then
     if not self:isCleanable() then
       local hospital = self.world:getLocalPlayerHospital()
-      local taskIndex = hospital:getIndexOfTask(self.tile_x, self.tile_y, "cleaning")
-      hospital:removeHandymanTask(taskIndex, "cleaning")
+      local task_index = hospital:getIndexOfTask(self.tile_x, self.tile_y, "cleaning")
+      hospital:removeHandymanTask(task_index, "cleaning")
     end
   end
 end

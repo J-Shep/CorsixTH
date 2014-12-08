@@ -649,17 +649,17 @@ end
 --! Count number of sitting and standing patients in the hospital.
 --!return (integer, integer) Number of sitting and number of standing patient in the hospital.
 function Hospital:countSittingStanding()
-  local numberSitting = 0
-  local numberStanding = 0
+  local number_sitting = 0
+  local number_standing = 0
   for _, patient in ipairs(self.patients) do
     if patient.action_queue[1].name == "idle" then
-      numberStanding = numberStanding + 1
+      number_standing = number_standing + 1
     elseif patient.action_queue[1].name == "use_object"
     and patient.action_queue[1].object.object_type.id == "bench" then
-      numberSitting = numberSitting + 1
+      number_sitting = number_sitting + 1
     end
   end
-  return numberSitting, numberStanding
+  return number_sitting, number_standing
 end
 
 
@@ -687,18 +687,18 @@ function Hospital:checkFacilities()
     -- check the seating : standing ratio of waiting patients
     -- find all the patients who are currently waiting around
     local show_msg = math.random(1, 4)
-    local numberSitting, numberStanding = self:countSittingStanding()
+    local number_sitting, number_standing = self:countSittingStanding()
 
     -- If there are patients standing then maybe the seating is in the wrong place!
     -- set to 5% (standing:seated) if there are more than 50 patients or 20% if there are less than 50.
     -- If this happens for 10 days in any month you are warned about seating unless you have already been warned that month
     -- So there are now two checks about having enough seating, if either are called then you won't receive praise. (may need balancing)
     if self.patientcount < 50 then
-      if numberStanding > math.min(numberSitting / 5) then
+      if number_standing > math.min(number_sitting / 5) then
         self.seating_warning = self.seating_warning + 1
       end
     else
-      if numberStanding > math.min(numberSitting / 20) then
+      if number_standing > math.min(number_sitting / 20) then
         self.seating_warning = self.seating_warning + 1
       end
       if self.seating_warning >= 10 and not self.bench_msg then
@@ -1254,11 +1254,11 @@ end
 
 -- Creates VIP
 function Hospital:createVip()
-  local vipName =  _S.vip_names[math.random(1,10)]
+  local vip_name =  _S.vip_names[math.random(1,10)]
   local message = {
-    {text = _S.fax.vip_visit_query.vip_name:format(vipName)},
-    choices = {{text = _S.fax.vip_visit_query.choices.invite, choice = "accept_vip", additionalInfo = {name=vipName}},
-               {text = _S.fax.vip_visit_query.choices.refuse, choice = "refuse_vip", additionalInfo = {name=vipName}}}
+    {text = _S.fax.vip_visit_query.vip_name:format(vip_name)},
+    choices = {{text = _S.fax.vip_visit_query.choices.invite, choice = "accept_vip", additionalInfo = {name=vip_name}},
+               {text = _S.fax.vip_visit_query.choices.refuse, choice = "refuse_vip", additionalInfo = {name=vip_name}}}
   }
   -- auto-refuse after 20 days
   self.world.ui.bottom_panel:queueMessage("personality", message, nil, 24*20, 2)
@@ -1352,11 +1352,11 @@ function Hospital:determineIfContagious(patient)
   local config = self.world.map.level_config
   local expertise = config.expertise
   local disease = patient.disease
-  local contRate = expertise[disease.expertise_id].ContRate or 0
+  local cont_rate = expertise[disease.expertise_id].ContRate or 0
 
   -- The patient is potentially contagious as we do not yet know if there
   -- is a suitable epidemic which they can belong to
-  local potentially_contagious = contRate > 0 and (math.random(1,contRate) == contRate)
+  local potentially_contagious = cont_rate > 0 and (math.random(1,cont_rate) == cont_rate)
   -- The patient isn't contagious if these conditions aren't passed
   local reduce_months = config.ReduceContMonths or 14
   local reduce_people = config.ReduceContPeepCount or 20
@@ -1764,23 +1764,23 @@ end
 
 function Hospital:addHandymanTask(object, taskType, priority, x, y, call)
 
-  local parcelId = self.world.map.th:getCellFlags(x, y).parcelId
-  local subTable = self:findHandymanTaskSubtable(taskType)
-  table.insert(subTable, {["object"] = object, ["priority"] = priority, ["tile_x"] = x, ["tile_y"] = y, ["parcelId"] = parcelId, ["call"] = call});
+  local parcel_id = self.world.map.th:getCellFlags(x, y).parcelId
+  local sub_table = self:findHandymanTaskSubtable(taskType)
+  table.insert(sub_table, {["object"] = object, ["priority"] = priority, ["tile_x"] = x, ["tile_y"] = y, ["parcelId"] = parcel_id, ["call"] = call});
 end
 
 function Hospital:modifyHandymanTaskPriority(taskIndex, newPriority, taskType)
   if taskIndex ~= -1 then
-    local subTable = self:findHandymanTaskSubtable(taskType)
+    local sub_table = self:findHandymanTaskSubtable(taskType)
     self:findHandymanTaskSubtable(taskType)[taskIndex].priority = newPriority;
   end
 end
 
 function Hospital:removeHandymanTask(taskIndex, taskType)
   if taskIndex ~= -1 then
-    local subTable = self:findHandymanTaskSubtable(taskType)
-    local task = subTable[taskIndex]
-    table.remove(subTable, taskIndex)
+    local sub_table = self:findHandymanTaskSubtable(taskType)
+    local task = sub_table[taskIndex]
+    table.remove(sub_table, taskIndex)
     if task.assignedHandyman then
       if task.object.ticks ~= true then
         task.assignedHandyman:interruptHandymanTask()
@@ -1805,22 +1805,22 @@ end
 
 function Hospital:assignHandymanToTask(handyman, taskIndex, taskType)
   if taskIndex ~= -1 then
-    local subTable = self:findHandymanTaskSubtable(taskType)
-    if not subTable[taskIndex].assignedHandyman then
-      subTable[taskIndex].assignedHandyman  = handyman
+    local sub_table = self:findHandymanTaskSubtable(taskType)
+    if not sub_table[taskIndex].assignedHandyman then
+      sub_table[taskIndex].assignedHandyman  = handyman
     else
-      local formerHandyman = subTable[taskIndex].assignedHandyman
-      subTable[taskIndex].assignedHandyman  = handyman
-      formerHandyman:interruptHandymanTask()
+      local former_handyman = sub_table[taskIndex].assignedHandyman
+      sub_table[taskIndex].assignedHandyman  = handyman
+      former_handyman:interruptHandymanTask()
     end
   end
 end
 
 function Hospital:searchForHandymanTask(handyman, taskType)
-  local subTable = self:findHandymanTaskSubtable(taskType)
+  local sub_table = self:findHandymanTaskSubtable(taskType)
   --if a distance is smaller than this value stop the search to
   --save performance
-  local thresholdForStopping = 3
+  local threshold_for_stopping = 3
   local first, dist, index, priority, multiplier = true, 0, -1, 0, 1
   if handyman.profile.is_consultant then
     multiplier = 0.5
@@ -1830,22 +1830,22 @@ function Hospital:searchForHandymanTask(handyman, taskType)
   if not handyman.parcelNr then
     handyman.parcelNr = 0
   end
-  for i, v in ipairs(subTable) do
+  for i, v in ipairs(sub_table) do
     local distance = self.world:getPathDistance(v.tile_x, v.tile_y, handyman.tile_x, handyman.tile_y)
-    local canContinue = true
+    local can_continue = true
     if not first and v.priority < priority then
-      canContinue = false
+      can_continue = false
     end
     if not v.parcelId then
        v.parcelId = self.world.map.th:getCellFlags(v.tile_x, v.tile_y).parcelId
     end
     if handyman.parcelNr ~= 0 and handyman.parcelNr ~= v.parcelId then
-      canContinue = false
+      can_continue = false
     end
     if distance == false then
-      canContinue = false
+      can_continue = false
     end
-    if canContinue then
+    if can_continue then
       if v.assignedHandyman then
         if v.assignedHandyman.fired then
           v.assignedHandyman = nil
@@ -1856,30 +1856,30 @@ function Hospital:searchForHandymanTask(handyman, taskType)
           print("Warning: Orphaned handyman is still assigned a task. Removing.");
           v.assignedHandyman = nil
         else
-          local assignedDistance = self.world:getPathDistance(v.tile_x, v.tile_y, v.assignedHandyman.tile_x, v.assignedHandyman.tile_y)
-          if assignedDistance ~= false then
+          local assigned_distance = self.world:getPathDistance(v.tile_x, v.tile_y, v.assignedHandyman.tile_x, v.assignedHandyman.tile_y)
+          if assigned_distance ~= false then
             if v.assignedHandyman.profile.is_consultant then
-              assignedDistance = assignedDistance / 2
+              assigned_distance = assigned_distance / 2
             elseif v.assignedHandyman.profile.is_junior then
-              assignedDistance = assignedDistance * 2
+              assigned_distance = assigned_distance * 2
             end
             distance = distance * multiplier
-            if distance + 5 > assignedDistance then
-              canContinue = false
+            if distance + 5 > assigned_distance then
+              can_continue = false
             else
               distance = distance / multiplier
             end
           end
         end
       end
-      if canContinue then
+      if can_continue then
         if first then
-          if distance <= thresholdForStopping then
+          if distance <= threshold_for_stopping then
             return i
           end
           first, dist, index, priority = false, distance, i, v.priority
         elseif  priority < v.priority or distance < dist then
-          if distance < thresholdForStopping then
+          if distance < threshold_for_stopping then
             return i
           end
           dist, index, priority = distance, i, v.priority
@@ -1892,8 +1892,8 @@ end
 
 
 function Hospital:getIndexOfTask(x, y, taskType)
-  local subTable = self:findHandymanTaskSubtable(taskType)
-  for i, v in ipairs(subTable) do
+  local sub_table = self:findHandymanTaskSubtable(taskType)
+  for i, v in ipairs(sub_table) do
     if v.tile_x == x and v.tile_y == y then
       return i
     end
