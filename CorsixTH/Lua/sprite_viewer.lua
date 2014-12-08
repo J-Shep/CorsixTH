@@ -48,7 +48,7 @@ table.sort(sprite_table_paths, function(lhs, rhs)
   return lhs[1] < rhs[1] or (lhs[1] == rhs[1] and lhs[2] < rhs[2])
 end)
 
-local function LoadTable(n, complex)
+local function loadTable(n, complex)
   sprite_table_index = n
   is_complex = complex
   local path = sprite_table_paths[n]
@@ -60,19 +60,19 @@ local function LoadTable(n, complex)
   need_draw = true
   y_off = 0
 end
-LoadTable(1, false)
+loadTable(1, false)
 
-local function DoKey(self, code)
+local function doKey(self, code)
   if code == string.byte"c" then
     gfx.cache.tabled = {}
-    LoadTable(sprite_table_index, not is_complex)
+    loadTable(sprite_table_index, not is_complex)
   elseif code == string.byte"a" then
     if sprite_table_index > 1 then
-      LoadTable(sprite_table_index - 1, is_complex)
+      loadTable(sprite_table_index - 1, is_complex)
     end
   elseif code == string.byte"d" then
     if sprite_table_index < #sprite_table_paths then
-      LoadTable(sprite_table_index + 1, is_complex)
+      loadTable(sprite_table_index + 1, is_complex)
     end
   elseif code == string.byte"w" then
     wdown = true
@@ -87,7 +87,7 @@ local function DoKey(self, code)
   return need_draw
 end
 
-local function DoKeyUp(self, code)
+local function doKeyUp(self, code)
     if code == string.byte"w" then
         wdown = false
     end
@@ -96,7 +96,7 @@ local function DoKeyUp(self, code)
     end
 end
 
-local function Render(canvas)
+local function render(canvas)
   local encoding = is_complex and " (Complex)" or " (Simple)"
   local msg = table.concat(sprite_table_paths[sprite_table_index], package.config:sub(1, 1)) .. encoding
   local _, fonth = font:sizeOf(msg)
@@ -129,18 +129,18 @@ local function Render(canvas)
   end
 end
 
-local function DoFrame(app)
+local function doFrame(app)
   local canvas = app.video
   canvas:startFrame()
   if need_draw then
     need_draw = app.config.track_fps
     canvas:fillBlack()
-    Render(canvas)
+    render(canvas)
   end
   canvas:endFrame()
 end
 
-local function DoTimer(app)
+local function doTimer(app)
   if wdown then
     y_off = y_off + 32
     need_draw = true
@@ -154,8 +154,8 @@ end
 
 old_event_handlers = app.eventHandlers
 app.eventHandlers = {
-  frame = DoFrame,
-  keydown = DoKey,
-  keyup = DoKeyUp,
-  timer = DoTimer,
+  frame = doFrame,
+  keydown = doKey,
+  keyup = doKeyUp,
+  timer = doTimer,
 }

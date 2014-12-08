@@ -48,7 +48,7 @@ local --[[persistable:persistance_global_fetch]] function global_fetch(...)
   return val
 end
 
-local function MakePermanentObjectsTable(inverted)
+local function makePermanentObjectsTable(inverted)
   local return_val = setmetatable({}, {})
   local permanent = return_val
   if inverted then
@@ -147,7 +147,7 @@ local function MakePermanentObjectsTable(inverted)
   return return_val
 end
 
-local function NameOf(obj) -- Debug aid
+local function nameOf(obj) -- Debug aid
   local explored = {[_G] = true}
   local to_explore = {[_G] = "_G"}
 
@@ -211,10 +211,10 @@ function SaveGame()
   }
   state.map:prepareForSave()
   --local status, res = xpcall(function()
-  local result, err, obj = persist.dump(state, MakePermanentObjectsTable(false))
+  local result, err, obj = persist.dump(state, makePermanentObjectsTable(false))
   state.map:afterSave()
   if not result then
-    print(obj, NameOf(obj)) -- for debugging
+    print(obj, nameOf(obj)) -- for debugging
     error(err)
   else
     return result
@@ -231,7 +231,7 @@ end
 
 function LoadGame(data)
   --local status, res = xpcall(function()
-  local state = assert(persist.load(data, MakePermanentObjectsTable(true)))
+  local state = assert(persist.load(data, makePermanentObjectsTable(true)))
   state.ui:resync(TheApp.ui)
   TheApp.ui = state.ui
   TheApp.world = state.world

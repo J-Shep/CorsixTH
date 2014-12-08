@@ -713,7 +713,7 @@ function UIPlaceObjects:setBlueprintCell(x, y)
   end
 end
 
-local function NearestPointOnLine(lx1, ly1, lx2, ly2, px, py)
+local function nearestPointOnLine(lx1, ly1, lx2, ly2, px, py)
   -- Translate everything to make one line segment endpoint be on the origin
   local lx = lx1 - lx2
   local ly = ly1 - ly2
@@ -742,7 +742,7 @@ function UIPlaceObjects:calculateBestPlacementPosition(x, y)
   local besto = self.object_orientation
   if room and object.locked_to_wall then
     if object.locked_to_wall.north then
-      local px, py = NearestPointOnLine(room.x + 0.5, room.y + 0.5,
+      local px, py = nearestPointOnLine(room.x + 0.5, room.y + 0.5,
         room.x + room.width - 0.5, room.y + 0.5, wx, wy)
       local d = ((px - wx)^2 + (py - wy)^2)^0.5
       if not bestd or d < bestd then
@@ -750,7 +750,7 @@ function UIPlaceObjects:calculateBestPlacementPosition(x, y)
       end
     end
     if object.locked_to_wall.west then
-      local px, py = NearestPointOnLine(room.x + 0.5, room.y + 0.5,
+      local px, py = nearestPointOnLine(room.x + 0.5, room.y + 0.5,
         room.x + 0.5, room.y + room.height - 0.5, wx, wy)
       local d = ((px - wx)^2 + (py - wy)^2)^0.5
       if not bestd or d < bestd then

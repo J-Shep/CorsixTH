@@ -1630,7 +1630,7 @@ function Hospital:hasRoomOfType(type)
   return result
 end
 
-local function RemoveByValue(t, value)
+local function removeByValue(t, value)
   for i, v in ipairs(t) do
     if v == value then
       table.remove(t, i)
@@ -1641,11 +1641,11 @@ local function RemoveByValue(t, value)
 end
 
 function Hospital:removeStaff(staff)
-  RemoveByValue(self.staff, staff)
+  removeByValue(self.staff, staff)
 end
 
 function Hospital:removePatient(patient)
-  RemoveByValue(self.patients, patient)
+  removeByValue(self.patients, patient)
 end
 
 -- TODO: This should depend on difficulty and level

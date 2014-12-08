@@ -500,7 +500,7 @@ function AnimationManager:setSecondaryMarker(anim, ...)
   return self:setMarkerRaw(anim, "setFrameSecondaryMarker", ...)
 end
 
-local function TableToPixels(t)
+local function tableToPixels(t)
   if t[3] == "px" then
     return t[1], t[2]
   else
@@ -522,8 +522,8 @@ function AnimationManager:setMarkerRaw(anim, fn, arg1, arg2, ...)
   if type == "table" then
     if arg2 then
       -- Linear-interpolation positions
-      local x1, y1 = TableToPixels(arg1)
-      local x2, y2 = TableToPixels(arg2)
+      local x1, y1 = tableToPixels(arg1)
+      local x2, y2 = tableToPixels(arg2)
       for i = 0, anim_length - 1 do
         local n = i / (anim_length - 1)
         anims[fn](anims, frame, (x2 - x1) * n + x1, (y2 - y1) * n + y1)
@@ -531,7 +531,7 @@ function AnimationManager:setMarkerRaw(anim, fn, arg1, arg2, ...)
       end
     else
       -- Static position
-      local x, y = TableToPixels(arg1)
+      local x, y = tableToPixels(arg1)
       for i = 1, anim_length do
         anims[fn](anims, frame, x, y)
         frame = anims:getNextFrame(frame)
@@ -542,7 +542,7 @@ function AnimationManager:setMarkerRaw(anim, fn, arg1, arg2, ...)
     local f1, x1, y1 = 0, 0, 0
     local args
     if arg1 == 0 then
-      x1, y1 = TableToPixels(arg2)
+      x1, y1 = tableToPixels(arg2)
       args = {...}
     else
       args = {arg1, arg2, ...}
@@ -557,7 +557,7 @@ function AnimationManager:setMarkerRaw(anim, fn, arg1, arg2, ...)
       if not f2 then
         f2 = args[args_i]
         if f2 then
-          x2, y2 = TableToPixels(args[args_i + 1])
+          x2, y2 = tableToPixels(args[args_i + 1])
           args_i = args_i + 2
         end
       end

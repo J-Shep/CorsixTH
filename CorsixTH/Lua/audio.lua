@@ -45,7 +45,7 @@ function Audio:clearCallbacks()
   self.entities_waiting_for_sound_to_be_enabled = {}
 end
 
-local function GetFileData(path)
+local function getFileData(path)
   local f, e = io.open(path, "rb")
   if not f then
     return f, e
@@ -145,7 +145,7 @@ function Audio:init()
   if midi_txt then
     local data
     if music_dir then
-      data = assert(GetFileData(music_dir .. midi_txt))
+      data = assert(getFileData(music_dir .. midi_txt))
     else
       data = assert(self.app.fs:readContents("Sound", "Midi", midi_txt))
     end
@@ -573,7 +573,7 @@ function Audio:playBackgroundTrack(index)
     if not music then
       local data
       if info.filename_mp3 then
-        data = assert(GetFileData(info.filename_mp3))
+        data = assert(getFileData(info.filename_mp3))
       else
         data = assert(self.app.fs:readContents(info.filename))
       end
