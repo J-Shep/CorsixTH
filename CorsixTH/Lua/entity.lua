@@ -27,6 +27,7 @@ local Entity = _G["Entity"]
 local TH = require "TH"
 
 function Entity:Entity(animation)
+  self.id = #TheApp.world.entities + 1
   self.th = animation
   self.layers = {}
   animation:setHitTestResult(self)

@@ -2590,6 +2590,13 @@ function World:afterLoad(old, new)
       end
     end
   end
+
+  if old < 102 then
+    for i, entity in ipairs(self.entities) do
+      entity.id = i
+    end
+  end
+
   self.savegame_version = new
 end
 

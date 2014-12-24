@@ -306,6 +306,7 @@ end
 
 -- Save game compatibility
 function Humanoid:afterLoad(old, new)
+  Entity.afterLoad(self, old, new)
   if old < 38 then
     -- should existing patients be updated and be getting really ill?
     -- adds the new variables for health icons
@@ -339,7 +340,6 @@ function Humanoid:afterLoad(old, new)
   if old < 83 and self.humanoid_class == "Chewbacca Patient" then
     self.die_anims.extra_east = 1682
   end
-  Entity.afterLoad(self, old, new)
 end
 
 -- Function which is called when the user clicks on the `Humanoid`.
@@ -363,6 +363,7 @@ function Humanoid:dump()
 
   print("-----------------------------------")
   print("Clicked on ".. name, self)
+  print("Entity ID: " .. self.id)
   print("Class: ", self.humanoid_class)
   if self.humanoid_class == "Doctor" then
     print(string.format("Skills: (%.3f)  Surgeon (%.3f)  Psych (%.3f)  Researcher (%.3f)",

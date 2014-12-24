@@ -127,6 +127,7 @@ function Litter:anyLitter()
 end
 
 function Litter:afterLoad(old, new)
+  Entity.afterLoad(self, old, new)
   if old < 52 then
     if self.tile_x then
       self.world.hospitals[1]:addHandymanTask(self, "cleaning", 1, self.tile_x, self.tile_y)

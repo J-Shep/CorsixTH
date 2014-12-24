@@ -740,6 +740,17 @@ function UIMenuBar:makeMenu(app)
                                                                           hour = tonumber(found())}
                                                                         end, "%d+")
                                                   end)
+      :appendItem(_S.menu_debug.center_view_on_entity, function(inputs)
+                                                         TheApp:showWindow(UIInputPrompt,
+                                                                           "Entity's ID:",
+                                                                           function(id)
+                                                                             id = tonumber(id)
+                                                                             if TheApp.world.entities[id] then
+                                                                               TheApp.ui:centerViewAtTile(TheApp.world.entities[id].tile_x,
+                                                                                                          TheApp.world.entities[id].tile_y)
+                                                                             end
+                                                                           end)
+                                                       end)
       :appendCheckItem(_S.menu_debug.limit_camera,         true, limit_camera, nil, function() return self.ui.limit_to_visible_diamond end)
       :appendCheckItem(_S.menu_debug.disable_salary_raise, false, disable_salary_raise, nil, function() return self.ui.app.world.debug_disable_salary_raise end)
       :appendItem(_S.menu_debug.make_debug_fax,     function() self.ui:makeDebugFax() end)

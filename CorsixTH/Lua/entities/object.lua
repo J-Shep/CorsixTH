@@ -716,6 +716,7 @@ function Object:onDestroy()
 end
 
 function Object:afterLoad(old, new)
+  Entity.afterLoad(self, old, new)
   if old < 52 then
     self.hospital = self.world:getLocalPlayerHospital()
   end
@@ -736,7 +737,6 @@ function Object:afterLoad(old, new)
       self:setTile(self.tile_x, self.tile_y)
     end
   end
-  return Entity.afterLoad(self, old, new)
 end
 
 local all_pathfind_dirs = {[0] = true, [1] = true, [2] = true, [3] = true}

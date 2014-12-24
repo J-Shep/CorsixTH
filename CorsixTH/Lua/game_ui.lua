@@ -726,6 +726,21 @@ function GameUI.limitPointToDiamond(dx, dy, visible_diamond, do_limit)
   return dx, dy, true
 end
 
+-- This function centers the hospital view on the specified tile.
+--!param tile_x (integer) For where to center the view.
+--!param tile_y (integer) For where to center the view.
+--!return screen_offset_x_before (integer) From before the view was moved.
+--!return screen_offset_y_before (integer) From before the view was moved.
+function GameUI:centerViewAtTile(tile_x, tile_y)
+  local x_before = self.screen_offset_x
+  local y_before = self.screen_offset_y
+
+  local sx, sy = TheApp.map:WorldToScreen(tile_x, tile_y)
+  TheApp.ui:scrollMapTo(sx, sy)
+
+  return x_before, y_before
+end
+
 function GameUI:scrollMap(dx, dy)
   dx = dx + self.screen_offset_x
   dy = dy + self.screen_offset_y
