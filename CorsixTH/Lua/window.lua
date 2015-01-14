@@ -37,14 +37,14 @@ function Window:Window()
   self.cursor_x = 0
   self.cursor_y = 0
 
-  self.panels = {
-  }
-  self.buttons = {
-  }
-  self.tooltip_regions = {
-  }
-  self.scrollbars = {
-  }
+  self.layout = nil
+  self.layout_panels = {}
+  self.panels = {}
+  self.labels = {}
+  self.buttons = {}
+  self.tooltip_regions = {}
+  self.scrollbars = {}
+
   self.textboxes = { -- list of textboxes in that window. NB: (Game)UI also uses this.
   }                  -- Take care not to handle things twice as UI is subclass of window!
   self.key_handlers = {--[[a set]]}
@@ -55,6 +55,31 @@ function Window:Window()
   self.panel_sprites = false
   self.visible = true
   self.draggable = true
+end
+
+function Window:setMainLayout(layout_managers_constructor, ...)
+  self.layout_panels["main"] = layout_managers_constructor(0, 
+                                                           0, 
+                                                           self.width, 
+                                                           self.height, 
+                                                           ...)
+  self.layout = "main"
+  return self.layout_panels["main"]
+end
+
+function Window:addLayoutPanel(parent_panels_name, name, width, height, layout_managers_constructor, ...)
+  local x, y = self.layout_panels[parent_panels_name]:add(width, height)
+  self.layout_panels[name] = layout_managers_constructor(x,
+                                                         y,
+                                                         width,
+                                                         height, 
+                                                         ...)
+  self.layout = name
+  return self.layout_panels[name]
+end
+
+function Window:getLayoutManager()
+  return self.layout_panels[self.layout]
 end
 
 -- Sets the window's onscreen position. Each of x and y can be:
@@ -327,22 +352,22 @@ function Panel:setSize(width, height)
   self.h = height
 end
 
---[[ Add a `Panel` to the window.
-! Panels form the basic building blocks of most windows. A panel is a small
-bitmap coupled with a position, and by combining several panels, a window can
-be made. By using panels to construct windows, all of the common tasks like
-drawing and hit-testing are provided for you by the base class methods, thus
-reducing the amount of code required elsewhere.
-!param sprite_index (integer) Index into the window's sprite table of the
-bitmap to be displayed.
-!param x (integer) The X pixel position to display the bitmap at.
-!param y (integer) The Y pixel position to display the bitmap at.
-!param w (integer, nil) If the panel is totally opaque, and the width of the
-panel (in pixels) is known, it should be specified here to speed up hit-tests.
-!param h (integer, nil) If the panel is totally opaque, and the height of the
-panel (in pixels) is known, it should be specified here to speed up hit-tests.
-]]
+--! Add a `Panel` to the window.
+-- Panels form the basic building blocks of most windows. A panel is a small
+-- bitmap coupled with a position, and by combining several panels, a window can
+-- be made. By using panels to construct windows, all of the common tasks like
+-- drawing and hit-testing are provided for you by the base class methods, thus
+-- reducing the amount of code required elsewhere.
+--!param sprite_index (integer) Index into the window's sprite table of the
+-- bitmap to be displayed.
+--!param x (integer) The X pixel position to display the bitmap at.
+--!param y (integer) The Y pixel position to display the bitmap at.
+--!param w (integer, nil) If the panel is totally opaque, and the width of the
+--panel (in pixels) is known, it should be specified here to speed up hit-tests.
+--!param h (integer, nil) If the panel is totally opaque, and the height of the
+--panel (in pixels) is known, it should be specified here to speed up hit-tests.
 function Window:addPanel(sprite_index, x, y, w, h)
+  x, y = self:chooseXYForComponent(x, y, w, h)
   local panel = setmetatable({
     window = self,
     x = x,
@@ -367,6 +392,7 @@ end
 --!param font (font) Optional, default: TheApp.gfx:loadFont("QData", "Font01V")
 --!param alignment (string) Optional, default: left
 function Window:addLabel(message, x, y, width, height, wrap, font, alignment)
+  x, y = self:chooseXYForComponent(x, y, width, height)
   wrap = wrap or false
   font = font or TheApp.gfx:loadFont("QData", "Font01V")
   alignment = alignment or "left"
@@ -409,6 +435,7 @@ function Window:addToggleButton(caption, caption_width, toggled_label, not_toggl
       green = 146,
       blue = 198,
     }
+    x, y = self:chooseXYForComponent(x, y, width, height)
     self:addBevelPanel(x, y, caption_width, height, caption_shadow, caption_bg, caption_bg)
       :setLabel(caption).lowered = true
     x = x + caption_width + 10
@@ -506,9 +533,29 @@ function Window:addTextBox(x, y, width, height, multi_line, tool_tip, col_textbo
   return textbox
 end
 
+--! This function should be called by any Window function which adds a UI
+-- component to the Window because this allows a layout manager to choose
+-- a component's position if layout managers are being used.
+--!param x (integer) Must be nil when there's a layout manager to choose it.
+--!param y (integer) Should be nil when there's a layout manager to choose it.
+--!param width (integer) The component's width.
+--!param height (integer) The component's height.
+--!return x (integer) For where the component should be placed.
+--!return y (integer) For where the component should be placed.
+function Window:chooseXYForComponent(x, y, width, height)
+  if not x then
+    return self.layout_panels[self.layout]:add(width, height)
+  else
+    return x, y
+  end
+end
+
 function Window:removeAllPanels()
   self.panels = {}
   self.buttons = {} -- Buttons cannot live without a panel
+  for _, layout_panel in ipairs(self.layout_panels) do
+    layout_panel:removeAll()
+  end
 end
 
 local --[[persistable: window_panel_colour_draw]] function panel_colour_draw(panel, canvas, x, y)
@@ -518,18 +565,18 @@ local --[[persistable: window_panel_colour_draw]] function panel_colour_draw(pan
   end
 end
 
---[[ Add a solid-colour `Panel` to the window.
-! A solid-colour panel is like a normal panel, expect it displays a solid
-colour rather than a bitmap.
-!param x (integer) The X pixel position to start the panel at.
-!param y (integer) The Y pixel position to start the panel at.
-!param w (integer) The width of the panel, in pixels.
-!param h (integer) The height of the panel, in pixels.
-!param r (integer) Value in [0, 255] giving the red component of the colour.
-!param g (integer) Value in [0, 255] giving the green component of the colour.
-!param b (integer) Value in [0, 255] giving the blue component of the colour.
-]]
+--! Add a solid-colour `Panel` to the window.
+-- A solid-colour panel is like a normal panel, expect it displays a solid
+-- colour rather than a bitmap.
+--!param x (integer) The X pixel position to start the panel at.
+--!param y (integer) The Y pixel position to start the panel at.
+--!param w (integer) The width of the panel, in pixels.
+--!param h (integer) The height of the panel, in pixels.
+--!param r (integer) Value in [0, 255] giving the red component of the colour.
+--!param g (integer) Value in [0, 255] giving the green component of the colour.
+--!param b (integer) Value in [0, 255] giving the blue component of the colour.
 function Window:addColourPanel(x, y, w, h, r, g, b)
+  x, y = self:chooseXYForComponent(x, y, w, h)
   local panel = setmetatable({
     window = self,
     x = x,
@@ -571,6 +618,7 @@ end
 --!param shadow_colour (colour in form .red, .green and .blue or nil) [optional] The colour for the shadow.
 --!param disabled_colour (colour in form .red, .green and .blue or nil) [optional] The colour for the disabled panel.
 function Window:addBevelPanel(x, y, w, h, colour, highlight_colour, shadow_colour, disabled_colour, min_size, max_size)
+  x, y = self:chooseXYForComponent(x, y, w, h)
   highlight_colour = highlight_colour or {
     red = sanitize(colour.red + 40),
     green = sanitize(colour.green + 40),

@@ -271,6 +271,8 @@ function App:init()
   end
 
   -- Load UI
+  dofile "layout_manager"
+  self:loadLuaFolder("layout")
   dofile "ui"
   if good_install_folder then
     dofile "game_ui"
