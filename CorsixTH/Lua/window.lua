@@ -356,6 +356,156 @@ function Window:addPanel(sprite_index, x, y, w, h)
   return panel
 end
 
+--! Adds a label to the window so that it will be drawn when Window:draw() is called.
+-- Some good dialog fonts from TH: {FONT00V - 02V, FONT04V}
+--!param message (string)
+--!param x (integer) The label's x coordinate offset from its Window's top left corner.
+--!param y (integer) The label's y coordinate offset from its Window's top left corner.
+--!param width (integer)
+--!param height (integer)
+--!param wrap (boolean) Optional, default: false
+--!param font (font) Optional, default: TheApp.gfx:loadFont("QData", "Font01V")
+--!param alignment (string) Optional, default: left
+function Window:addLabel(message, x, y, width, height, wrap, font, alignment)
+  wrap = wrap or false
+  font = font or TheApp.gfx:loadFont("QData", "Font01V")
+  alignment = alignment or "left"
+  table.insert(self.labels, {x_offset = x,
+                             y_offset = y,
+                             width = width,
+                             height = height,
+                             message = message,
+                             font = font,
+                             alignment = alignment,
+                             wrap = wrap})
+end
+
+--! Adds a toggle button, optionally with a caption.
+--!param caption (string)
+--!param caption_width (integer)
+--!param toggled_label (string)
+--!param not_toggled_label (string)
+--!param tooltip (string)
+--!param x (integer) Relative to the window's position at draw time.
+--!param y (integer) Relative to the window's position at draw time.
+--!param height (integer)
+--!param width (integer)
+--!param on_click (function)
+--!param buttons_colour (table) Optional: The table should have these fields: red, green, blue
+--!param caption_bg (table) Optional, the caption's background colour. 
+-- The table should have these fields: red, green, blue
+--!param caption_shadow (table) Optional, the caption's shadow colour.
+-- The table should have these fields: red, green, blue
+--!return button (BevelPanel)
+function Window:addToggleButton(caption, caption_width, toggled_label, not_toggled_label, tooltip, x, y, width, height, on_click, buttons_colour, caption_bg, caption_shadow)
+  if caption then
+    caption_shadow = caption_shadow or {
+      red = 134,
+      green = 126,
+      blue = 178,
+    }
+    caption_bg = caption_bg or {
+      red = 154,
+      green = 146,
+      blue = 198,
+    }
+    self:addBevelPanel(x, y, caption_width, height, caption_shadow, caption_bg, caption_bg)
+      :setLabel(caption).lowered = true
+    x = x + caption_width + 10
+  end
+  return self:addButton(not_toggled_label, tooltip, x, y, width, height, on_click, buttons_colour):makeToggle(toggled_label, not_toggled_label)
+end
+
+--! Adds a drop down menu button, optionally with a caption.
+--!param caption (string)
+--!param caption_width (integer)
+--!param options (table) The list of items the menu will display, where each item is a table with at least
+-- the field text, and optionally fields font and/or tooltip
+--!param not_toggled_label (string)
+--!param tooltip (string)
+--!param x (integer) Relative to the window's position at draw time.
+--!param y (integer) Relative to the window's position at draw time.
+--!param height (integer)
+--!param width (integer)
+--!param on_click (function) called when a menu item has been clicked
+-- with these parameters: parent_window and selected_index
+--!param buttons_colour (table) Optional: The table should have these fields: red, green, blue
+--!param caption_bg (table) Optional, the caption's background colour. 
+-- The table should have these fields: red, green, blue
+--!param caption_shadow (table) Optional, the caption's shadow colour.
+-- The table should have these fields: red, green, blue
+--!param menu_colour (table) Optional: The table should have these fields: red, green, blue
+--!return button (BevelPanel)
+function Window:addDropDownMenu(caption, caption_width, options, tooltip, x, y, width, height, on_click, buttons_colour, caption_bg, caption_shadow, menu_colour)
+  local button = self:addToggleButton(caption, caption_width, nil, nil, tooltip, x, y, width, height, nil, buttons_colour, caption_bg, caption_shadow)
+  button.on_click = function(activate)
+    if activate then
+      button.dropdown_menu = UIDropdown(self.ui, self, button, options, on_click, menu_colour)
+      self:addWindow(button.dropdown_menu)
+    else
+      button:setToggleState(false)
+      if button.dropdown_menu then
+        button.dropdown_menu:close()
+        button.dropdown_menu = nil
+      end
+    end
+  end
+  button:setLabel(options[1].text)
+  return button
+end
+
+
+--! Adds a BevelPanel button to a window
+--!param label (string)
+--!param x (integer) Relative to the window's position at draw time.
+--!param y (integer) Relative to the window's position at draw time.
+--!param height (integer)
+--!param width (integer)
+--!param tooltip (string)
+--!param on_click (function)
+--!param colour (table) Optional: The table should have these fields: red, green, blue
+--!return button (BevelPanel)
+function Window:addButton(label, tooltip, x, y, width, height, on_click, colour)
+  colour = colour or {red = 154, green = 146, blue = 198}
+  return self:addBevelPanel(x, y, width, height, colour):
+          setLabel(label):
+            makeButton(0, 0, width, height, nil, on_click):setTooltip(tooltip)
+end
+
+--! Adds a text box (Bevel Panel) to a window.
+--!param x (integer)
+--!param y (integer)
+--!param multi_line (boolean) Optional: Is muli-line textbox? default = false
+--!param tool_tip (string) Optional
+--!param col_textbox (colour) Optional, default: black text box.
+--!param col_highlight (colour) Optional, default: highlight for black text box.
+--!param col_shadow (colour) Optional, default: shadow for black text box.
+--!param font (font) Optional, default: app.gfx:loadBuiltinFont()
+--!param allowedInput (string) Optional, default: "All"
+--!param confirm_callback (function) Optional: The function to call when text is confirmed.
+--!param abort_callback (function) Optional: The function to call when entering is aborted.
+--!return text box (textBox)
+function Window:addTextBox(x, y, width, height, multi_line, tool_tip, col_textbox, col_highlight, col_shadow, font, allowedInput, confirm_callback, abort_callback)
+  col_textbox = col_textbox or {red = 0, green = 0, blue = 0}
+  col_highlight = col_highlight or {red = 174, green = 166, blue = 218}
+  col_highlight = col_highlight or {red = 134, green = 126, blue = 178}
+  allowedInput = allowedInput or "all"
+  multi_line = multi_line or false
+  tool_tip = tool_tip or ""
+  font = font or TheApp.gfx:loadBuiltinFont()
+
+  local textbox = self:addBevelPanel(x, y, width, height, col_textbox, col_highlight, col_shadow)
+    :setLabel("", font, "left"):setTooltip(tool_tip):setAutoClip(true)
+    :makeTextbox(nil, confirm_callback, abort_callback):allowedInput(allowedInput):setText({""})
+
+  if multi_line then
+    textbox:setText({""})
+  end
+
+  textbox:setActive(true) -- activated by default
+  return textbox
+end
+
 function Window:removeAllPanels()
   self.panels = {}
   self.buttons = {} -- Buttons cannot live without a panel
@@ -409,19 +559,18 @@ local --[[persistable: window_panel_bevel_draw]] function panel_bevel_draw(panel
   end
 end
 
---[[ Add a beveled `Panel` to the window.
-! A bevel panel is similar to a solid colour panel, except that it
-features a highlight and a shadow that makes it appear either lowered or raised.
-!param x (integer) The X pixel position to start the panel at.
-!param y (integer) The Y pixel position to start the panel at.
-!param w (integer) The width of the panel, in pixels.
-!param h (integer) The height of the panel, in pixels.
-!param colour (colour in form .red, .green and .blue) The colour for the panel.
-!param highlight_colour (colour in form .red, .green and .blue or nil) [optional] The colour for the highlight.
-!param shadow_colour (colour in form .red, .green and .blue or nil) [optional] The colour for the shadow.
-!param disabled_colour (colour in form .red, .green and .blue or nil) [optional] The colour for the disabled panel.
-]]
-function Window:addBevelPanel(x, y, w, h, colour, highlight_colour, shadow_colour, disabled_colour)
+--! Add a beveled `Panel` to the window.
+-- A bevel panel is similar to a solid colour panel, except that it
+-- features a highlight and a shadow that makes it appear either lowered or raised.
+--!param x (integer) The X pixel position to start the panel at.
+--!param y (integer) The Y pixel position to start the panel at.
+--!param w (integer) The width of the panel, in pixels.
+--!param h (integer) The height of the panel, in pixels.
+--!param colour (colour in form .red, .green and .blue) The colour for the panel.
+--!param highlight_colour (colour in form .red, .green and .blue or nil) [optional] The colour for the highlight.
+--!param shadow_colour (colour in form .red, .green and .blue or nil) [optional] The colour for the shadow.
+--!param disabled_colour (colour in form .red, .green and .blue or nil) [optional] The colour for the disabled panel.
+function Window:addBevelPanel(x, y, w, h, colour, highlight_colour, shadow_colour, disabled_colour, min_size, max_size)
   highlight_colour = highlight_colour or {
     red = sanitize(colour.red + 40),
     green = sanitize(colour.green + 40),
@@ -577,10 +726,19 @@ function Button:enable(enable)
   return self
 end
 
-function Button:makeToggle()
+--!param toggled_label (string) optional
+--!param not_toggled_label (table) optional
+function Button:makeToggle(toggled_label, not_toggled_label)
   self.is_toggle = true
   self.is_repeat = false
   self.toggled = false
+  if toggled_label and not_toggled_label then
+    self.state_labels = {}
+    self.state_labels[true] = toggled_label
+    self.state_labels[false] = not_toggled_label
+  else
+    self.state_labels = nil
+  end
   return self
 end
 
@@ -599,6 +757,10 @@ function Button:toggle()
   self.panel_for_sprite.sprite_index = self.sprite_index_normal
   self.panel_for_sprite.lowered = self.panel_lowered_normal
   self.toggled = not self.toggled
+  if self.state_labels then
+    self:setLabel(self.state_labels[self.toggled])
+  end
+
   return self.toggled
 end
 
@@ -1199,6 +1361,23 @@ function Textbox:setText(text)
   return self
 end
 
+--! return text (string) If the textbox is empty an empty string will be returned.
+function Textbox:getText()
+  if type(self.text) == "string" then
+    return self.text
+  else
+    local lines = ""
+    for i, line in ipairs(self.text) do
+       if i == 1 then
+         lines = line
+       else
+         lines = lines .. "\n" .. line
+       end
+    end
+    return lines
+  end
+end
+
 function Textbox:setPosition(x, y)
   self.button:setPosition(x, y)
 end
@@ -1245,6 +1424,7 @@ end
 
 
 function Window:draw(canvas, x, y)
+  local max_component_width = self.width
   x, y = x + self.x, y + self.y
   if self.panels[1] then
     local panel_sprites = self.panel_sprites
@@ -1262,6 +1442,24 @@ function Window:draw(canvas, x, y)
   if not class.is(self, UI) then -- prevent UI (sub)class from handling the textboxes too
     for _, box in ipairs(self.textboxes) do
       box:drawCursor(canvas, x, y)
+    end
+  end
+  for _, label in ipairs(self.labels) do
+    if label.wrap then
+      label.font:drawWrapped(canvas,
+                             label.message,
+                             x + label.x_offset,
+                             y + label.y_offset,
+                             label.width or max_component_width,
+                             label.alignment)
+    else
+      label.font:draw(canvas,
+                      label.message,
+                      x + label.x_offset,
+                      y + label.y_offset,
+                      label.width or max_component_width,
+                      label.height,
+                      label.alignment)
     end
   end
   if self.windows then

@@ -258,6 +258,11 @@ tooltip.main_menu = {
   quit = "You are about to quit from CorsixTH.   Are you sure this is what you want to do?",
 }
 
+shared = {
+  yes = "Yes",
+  no = "No"
+}
+
 load_game_window = {
   caption = "Load Game (%1%)",
 }
