@@ -121,6 +121,7 @@ local config_defaults = {
   audio_buffer_size = 2048,
   theme_hospital_install = [[F:\ThemeHospital\hospital]],
   debug = false,
+  contact_info = nil,
   DBGp_client_idehost = nil,
   DBGp_client_ideport = nil,
   DBGp_client_idekey = nil,
@@ -427,7 +428,8 @@ audio_mp3 = nil -- [[X:\ThemeHospital\Music]]
 -- If set to true more detailed information will be printed in the terminal
 -- and a debug menu will be visible.
 -- ]=] .. '\n' ..
-'debug = ' .. tostring(config_values.debug) .. '\n' .. [=[
+'debug = ' .. tostring(config_values.debug) .. '\n' ..
+'contact_info = ' .. tostring(config_values.contact_info) .. "\n" .. [=[ 
 
 --Optional settings for CorsixTH's Lua DBGp client.
 --Default settings are nil values, platform & workingdir will be autodected if nil.

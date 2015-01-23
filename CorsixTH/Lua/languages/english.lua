@@ -63,6 +63,13 @@ date_format = {
   daymonth = "%1% %2:months%",
 }
 
+errors = {
+  savegame_dir_creation_error = "Savegame directory does not exist and could not be created: ",
+  save_info_file_creation_error = "Save info file does not exist and could not be created: ",
+  screenshot = "Screenshot failed: ",
+  error = "Error: "
+}
+
 object.litter = "Litter"
 tooltip.objects.litter = "Litter: Left on the floor by a patient because he did not find a bin to throw it in."
 
@@ -73,6 +80,8 @@ tooltip.casebook.cure_requirement.hire_staff = "You need to employ staff to hand
 tooltip.casebook.cure_type.unknown = "You do not yet know how to treat this disease"
 tooltip.research_policy.no_research = "No research is being carried out in this category at the moment"
 tooltip.research_policy.research_progress = "Progress towards the next discovery in this category: %1%/%2%"
+
+confirmation.attempt_recovery = "Would you like to attempt a recovery?"
 
 menu_file = {
   load =    " (SHIFT+L) LOAD   ",
@@ -263,6 +272,28 @@ tooltip.main_menu = {
 shared = {
   yes = "Yes",
   no = "No"
+}
+
+ui_report_error = {
+  an_error_has_occured = "An Error Has Occurred",
+  apology = "We are sorry you've experienced this error. CorsixTH has created " ..
+            "an error report with screenshots and can email this, with related saved games, to its developers.",
+  how_to_reproduce = "Please tell us what steps will reproduce this error:",
+  prefer_manual_report = "We would like you to report this error yourself:",
+  please_open_github_issue = "If you have time please report this error yourself instead " ..
+                             "of making CorsixTH report it now: by opening a Github issue " ..
+                             "and attaching the generated report:",
+  if_not_going_to_manually_report = "If you're not going to report this error yourself:",
+  please_provide_contact_details = "Please provide us with a way to contact you about this error such as your email address, CorsixTH forum or Github user name:",
+  discard = "Discard Report",
+  save = "Save Report",
+  send = "Send Report",
+  save_contact_info = "Save contact info in config.txt?: "
+}
+
+report_error = {
+  manually_locate_save = "Please manually locate your latest saved game for this error's hospital if it has a saved game.",
+  not_sent_but_saved = "The error report has been saved because it could not be sent."
 }
 
 load_game_window = {

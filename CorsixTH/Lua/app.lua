@@ -43,6 +43,7 @@ function App:App()
   self.runtime_config = {}
   self.running = false
   self.key_modifiers = {}
+  self.log_messages = {}
   self.gfx = {}
   self.last_dispatch_type = ""
   self.eventHandlers = {
@@ -110,10 +111,26 @@ function App:init()
     conf_chunk(self.config)
   end
   self:fixConfig()
+  -- If debug mode is enabled and there's an error's game config load it:
+  if self.config.debug then
+    local pathsep = package.config:sub(1, 1)
+    local error_conf_path = (TheApp.command_line["config-file"] or ""):match("^(.-)[^".. pathsep .."]*$")
+                            .. pathsep .. "error_config.txt"
+    if not is_file_unreadable(error_conf_path) then
+      local conf_chunk, conf_err = loadfile_envcall(error_conf_path)
+      if not conf_chunk then
+        error("Unable to load error_config.txt:" .. conf_err)
+      else
+        conf_chunk(self.config)
+      end
+    end
+  end
+
   dofile "filesystem"
   local good_install_folder, error_message = self:checkInstallFolder()
   self.good_install_folder = good_install_folder
   -- self:checkLanguageFile()
+  self:initUnreportedErrorsDir()
 
   self:initSavegameDir()
 
@@ -295,6 +312,7 @@ function App:init()
   if _MAP_EDITOR then
     self:loadLevel("")
   else
+    self:deleteRedundantSaveInfoTablePaths()
     local function callback_after_movie()
       self:loadMainMenu()
       -- If we couldn't properly load the language, show an information dialog
@@ -330,6 +348,85 @@ function App:init()
   return true
 end
 
+--! Announces an error to the player in a UIInformation message
+-- and console message. It will also record the error in the the
+-- game log if its an in game error.
+--!param error_message (string)
+--!param dont_show_gui_message (boolean) optional, default: true
+function App:announceError(error_message, dont_show_gui_message)
+  dont_show_gui_message = dont_show_gui_message or false
+  if not dont_show_gui_message then
+    self.ui:addWindow(UIInformation(self.ui, {error_message}, true))
+  end
+  if self.world then
+    self.world:gameLog("Error: " .. error_message)
+  else
+    self:log("Error: " .. error_message)
+  end
+end
+
+-- This function deletes a save_info table entry
+-- when its path is no longer valid. LoadGameFile()
+-- will create a new entry for a loaded saved game
+-- when its path is changed.
+function App:deleteRedundantSaveInfoTablePaths()
+  if not self.save_info_file then
+    return
+  end
+  local save_info_table = LoadTableFromFile(self.save_info_file)
+  if save_info_table then
+    local update_required = false
+    for path, _ in pairs(save_info_table) do
+      if is_file_unreadable(path) then
+        update_required = true
+        save_info_table[path] = nil
+      end
+    end
+    if update_required then
+      local f = io.open(self.save_info_file, "w+")
+      if f then
+        f:write(persist.dump(save_info_table, setmetatable({}, {})))
+        f:close()
+      end
+    end
+  end
+end
+
+--! Log a message in log.txt instead of gamelog.txt for when
+-- a message should be logged but no game is running.
+function App:log(message)
+  table.insert(self.log_messages, message)
+  print(message)
+end
+
+--! Dumps log.txt which contains non game log messages.
+function App:dumpLog()
+  local config_path = TheApp.command_line["config-file"] or ""
+  config_path = config_path:match("^(.-)[^".. package.config:sub(1, 1) .."]*$")
+  local file, error = io.open(config_path .. "log.txt", "w")
+  if file then
+    for _, str in ipairs(self.log_messages) do
+      file:write(str .. "\n")
+    end
+    file:close()
+  else
+    print(error)
+  end
+end
+
+function App:initUnreportedErrorsDir()
+  local conf_path = self.command_line["config-file"] or "config.txt"
+  self.unreported_errors_dir = conf_path:match("^(.-)[^".. pathsep .. "]*$") .. "Unreported Errors"
+  lfs.mkdir(self.unreported_errors_dir)
+  if lfs.attributes(self.unreported_errors_dir, "mode") ~= "directory" then
+    if not lfs.mkdir(self.unreported_errors_dir) then
+      print "Notice: Unreported errors directory does not exist and could not be created."
+      self.unreported_errors_dir = nil
+    end
+  end
+  self.unreported_errors_dir = self.unreported_errors_dir .. package.config:sub(1, 1)
+end
+
 --! Tries to initialize the savegame directory, returns true on success and
 --! false on failure.
 function App:initSavegameDir()
@@ -339,13 +436,26 @@ function App:initSavegameDir()
     self.savegame_dir = self.savegame_dir:sub(1, -2)
   end
   if lfs.attributes(self.savegame_dir, "mode") ~= "directory" then
-    if not lfs.mkdir(self.savegame_dir) then
-       print "Notice: Savegame directory does not exist and could not be created."
+    local success, error = lfs.mkdir(self.savegame_dir)
+    if success then
+       self:announceError(_S.errors.savegame_dir_creation_error .. error, false)
        return false
     end
   end
   if self.savegame_dir:sub(-1, -1) ~= pathsep then
     self.savegame_dir = self.savegame_dir .. pathsep
+  end
+  --Create save_info.table:
+  self.save_info_file = self.savegame_dir .. "save_info.table"
+  if is_file_unreadable(self.save_info_file) then
+    local file, error = io.open(self.save_info_file, "w")
+    if file then
+      file:write(persist.dump({}, setmetatable({}, {})))
+      file:close()
+    else
+      self.save_info_file = nil
+      self:announceError(_S.errors.save_info_file_creation_error .. error, false)
+    end
   end
   return true
 end
@@ -803,6 +913,7 @@ function App:run()
   debug.sethook(co, nil)
   self.running = false
   if e ~= nil then
+    local reported_callback = nil
     if where then
       -- Errors from an asynchronous callback done on the dispatcher coroutine
       -- will end up here. As the error didn't originate from a dispatched
@@ -810,41 +921,43 @@ function App:run()
       -- returned from mainloop(), meaning that where == "callback".
       self.last_dispatch_type = where
     end
-    print("An error has occured!")
-    print("Almost anything can be the cause, but the detailed information "..
-    "below can help the developers find the source of the error.")
-    print("Running: The " .. self.last_dispatch_type .. " handler.")
-    print "A stack trace is included below, and the handler has been disconnected."
-    print(debug.traceback(co, e, 0))
-    print ""
-    if self.world then
-      self.world:gameLog("Error in " .. self.last_dispatch_type .. " handler: ")
-      self.world:gameLog(debug.traceback(co, e, 0))
-      self.world:dumpGameLog()
-    end
     if self.world and self.last_dispatch_type == "timer" and self.world.current_tick_entity then
       -- Disconnecting the tick handler is quite a drastic measure, so give
       -- the option of just disconnecting the offending entity and attempting
       -- to continue.
       local handler = self.eventHandlers[self.last_dispatch_type]
       local entity = self.world.current_tick_entity
-      self.world.current_tick_entity = nil
       if class.is(entity, Patient) then
-        self.ui:addWindow(UIPatient(self.ui, entity))
+        self.ui:addWindow(UIPatient(self.ui, entity)) --TODO joe ???
       elseif class.is(entity, Staff) then
         self.ui:addWindow(UIStaff(self.ui, entity))
       end
-      self.ui:addWindow(UIConfirmDialog(self.ui,
-        "Sorry, but an error has occured. There can be many reasons - see the log "..
-        "window for details. Would you like to attempt a recovery?",
-        --[[persistable:app_attempt_recovery]] function()
-          self.world:gameLog("Recovering from error in timer handler...")
-          entity.ticks = false
-          self.eventHandlers.timer = handler
+      reported_callback =
+        function()
+          self.ui:addWindow(UIConfirmDialog(self.ui,
+                                            _S.confirmation.attempt_recovery,
+                                            --[[persistable:app_attempt_recovery]] function()
+                                              self.world.current_tick_entity = nil
+                                              self.eventHandlers[self.last_dispatch_type] = nil
+                                              self.world.recovered_from_error = true
+                                              self.world:gameLog("Recovering from error in timer handler...")
+                                              entity.ticks = false
+                                              self.eventHandlers.timer = handler
+                                            end))
         end
-      ))
     end
-    self.eventHandlers[self.last_dispatch_type] = nil
+
+    -- Disconnect the event handler now if the error report dialog won't require it:
+    local not_required = {timer = true,
+                          music_over = true,
+                          movie_over = true,
+                          sound_over = true}
+    if not_required[self.last_dispatch_type] then
+      self.eventHandlers[self.last_dispatch_type] = nil
+    end
+
+    self:reportLuaError(debug.traceback(co, e, 0), reported_callback)
+
     if self.last_dispatch_type ~= "frame" then
       -- If it wasn't the drawing code which failed, then it would be useful
       -- to ensure that a draw happens, as with events disconnected, a frame
@@ -853,6 +966,30 @@ function App:run()
     end
     return self:run()
   end
+end
+
+--! This function starts the process of sending an Lua error report by displaying
+-- a ErrorOccurred dialog which will execute the send_report script with its
+-- inputted information if a player confirms they want to report an error.
+--!param error_message (string)
+--!param after_callback (function) Optional
+function App:reportLuaError(error_message, after_callback)
+  self.ui:addWindow(ErrorOccurred(self.ui,
+                                  error_message,
+                                  self.last_dispatch_type,
+                                  true,
+                                  after_callback))
+end
+
+--! Calls app.ui:addWindow(constructor(app.ui, ...))
+--!param constructor (function) Provide the name of the Dialog class without quotes.
+--!param ... (vargs) Parameters for the dialog class's constructor excluding the
+-- ui parameter.
+--!return displayed_window (Window)
+function App:showWindow(constructor, ...)
+  local window = constructor(self.ui, ...)
+  self.ui:addWindow(window)
+  return window
 end
 
 local done_no_handler_warning = {}

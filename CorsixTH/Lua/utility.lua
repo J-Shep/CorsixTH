@@ -294,3 +294,33 @@ function list_to_set(list)
   end
   return set
 end
+
+--! This function makes a coroutine wait by
+-- blocking it instead of making it sleep.
+--!param delay (seconds)
+function wait(delay)
+   local time_to = os.time() + delay
+   while os.time() < time_to do 
+
+   end
+end
+
+--! Copies a file.
+--!param files_path (string) The source file's path.
+--!param copies_path (string) The copy's path.
+--!return error (string) Or nil.
+function copy_file(files_path, copies_path)
+  local source, error = io.open(files_path, "r")
+  if source then
+    local source_string, error = source:read("*a")
+    source:close()
+    if not error then
+      local copy, error = io.open(copies_path, "w")
+      if not error then
+        copy:write(source_string)
+        copy:close()
+      end
+    end
+  end
+  return error
+end

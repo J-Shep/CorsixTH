@@ -52,6 +52,8 @@ local local_criteria_variable = {
 }
 
 function World:World(app)
+  self.id = os.date("%c", os.time())
+  self.recovered_from_error = false
   self.map = app.map
   self.wall_types = app.walls
   self.object_types = app.objects
@@ -2330,7 +2332,6 @@ end
 --!param old The old version of the save game.
 --!param new The current version of the save game format.
 function World:afterLoad(old, new)
-
   if not self.original_savegame_version then
     self.original_savegame_version = old
   end

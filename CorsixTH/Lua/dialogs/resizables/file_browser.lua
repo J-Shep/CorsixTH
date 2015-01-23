@@ -208,7 +208,7 @@ function UIFileBrowser:UIFileBrowser(ui, mode, title, vertical_size, root, show_
           name = node.parent.label .. pathsep .. name
           node = node.parent
         end
-        self:choiceMade(name)
+        self:choiceMade(name, node.path)
       end
     end)
   self:addWindow(self.control)

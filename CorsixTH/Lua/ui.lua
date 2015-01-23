@@ -814,21 +814,30 @@ end
 function UI:tutorialStep(...)
 end
 
-function UI:makeScreenshot()
-   -- Find an index for screenshot which is not already used
-  local i = 0
-  local filename
-  repeat
-    filename = TheApp.screenshot_dir .. ("screenshot%i.bmp"):format(i)
-    i = i + 1
-  until lfs.attributes(filename, "size") == nil
+--! Make a screenshot
+--!param name (string) Optional, default: screenshot.
+--!return filename (string) The name given to the new screenshot.
+--!return error_message (string)
+function UI:makeScreenshot(name)
+  name = name or "screenshot"
+  local error_message = nil
+  local filename = self.app.screenshot_dir .. name .. ".bmp"
+  if lfs.attributes(filename, "size") ~= nil then
+    -- Find an index for the screenshot which is not already used:
+    local i = 0
+    repeat
+      filename = self.app.screenshot_dir .. (name .."%i.bmp"):format(i)
+      i = i + 1
+    until lfs.attributes(filename, "size") == nil
+  end
   print("Taking screenshot: " .. filename)
-  local res, err = self.app.video:takeScreenshot(filename) -- Take screenshot
-  if not res then
-    print("Screenshot failed: " .. err)
+  local res, error_message = self.app.video:takeScreenshot(filename) -- Take screenshot
+  if error_message then
+    self.app:announceError(_S.errors.screenshot_failed .. error_message)
   else
     self.app.audio:playSound("SNAPSHOT.WAV")
   end
+  return filename, error_message
 end
 
 --! Closes one window (the topmost / active window, if possible)

@@ -201,6 +201,7 @@ strict_declare_global "SaveGame"
 strict_declare_global "SaveGameFile"
 strict_declare_global "LoadGame"
 strict_declare_global "LoadGameFile"
+strict_declare_global "LoadTableFromFile"
 
 function SaveGame()
   local state = {
@@ -227,6 +228,35 @@ function SaveGameFile(filename)
   local f = assert(io.open(filename, "wb"))
   f:write(data)
   f:close()
+
+  -- If this is a new saved game then update save_info.table:
+  if TheApp.world.id and TheApp.save_info_file then
+    local save_info_table = LoadTableFromFile(TheApp.save_info_file) or {}
+
+    if not save_info_table[filename] then
+      save_info_table[filename] = {name = filename:match("[^" .. package.config:sub(1, 1) .. "]+%.sav"),
+                                   world_id = TheApp.world.id,
+                                   unused_entity_id = #TheApp.world.entities + 1}
+      local f = io.open(TheApp.save_info_file, "w+")
+      if f then
+        f:write(persist.dump(save_info_table, setmetatable({}, {})))
+        f:close()
+      end
+    end
+  end
+end
+
+-- This function can only load simple tables.
+--!return loaded_table (table) Or nil if the file couldn't be opened
+function LoadTableFromFile(filename)
+  local f = io.open(filename, "rb")
+  if f then
+    local data = f:read"*a"
+    f:close()
+    return persist.load(data, setmetatable({}, {}))
+  else
+    return nil
+  end
 end
 
 function LoadGame(data)
@@ -263,4 +293,20 @@ function LoadGameFile(filename)
   local data = f:read"*a"
   f:close()
   LoadGame(data)
+
+  -- Updates the save_info table entry for the loaded saved game
+  -- when its been moved or renamed:
+  if TheApp.world.id and TheApp.save_info_file then
+    local save_info_table = LoadTableFromFile(TheApp.save_info_file) or {}
+    if not save_info_table[filename] then
+      save_info_table[filename] = {name = filename:match("[^" .. package.config:sub(1, 1) .. "]+%.sav"),
+                                   world_id = TheApp.world.id,
+                                   unused_entity_id = #TheApp.world.entities + 1}
+      local f = io.open(TheApp.save_info_file, "w+")
+      if f then
+        f:write(persist.dump(save_info_table, setmetatable({}, {})))
+        f:close()
+      end
+    end
+  end
 end

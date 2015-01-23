@@ -741,6 +741,15 @@ function GameUI:centerViewAtTile(tile_x, tile_y)
   return x_before, y_before
 end
 
+-- This function changes the value of GameUI.screen_offset_x and
+-- GameUI.screen_offset_y to the provided values.
+-- !param new_x_offset (integer)
+-- !param new_y_offset (integer)
+function GameUI:setScreenOffset(x, y)
+  self.screen_offset_x = x
+  self.screen_offset_y = y
+end
+
 function GameUI:scrollMap(dx, dy)
   dx = dx + self.screen_offset_x
   dy = dy + self.screen_offset_y
