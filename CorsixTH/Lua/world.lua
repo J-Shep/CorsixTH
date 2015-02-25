@@ -83,6 +83,7 @@ function World:World(app)
   self.month = 1 -- January
   self.day = 1
   self.hour = 0
+  self.pause_date = nil
 
   self.room_information_dialogs_off = app.config.debug
   -- This is false when the game is paused.
@@ -1047,6 +1048,14 @@ function World:onTick()
       end
     end
     self.tick_timer = self.tick_rate
+
+    if self.pause_date then
+      if self.pause_date.hour >= self.hour and self.pause_date.day == self.day and self.pause_date.month == self.month and self.pause_date.year == self.year then
+        self:pauseOrUnpause()
+        self.pause_date = nil
+      end
+    end
+
     self.hour = self.hour + self.hours_per_tick
 
     -- if an earthquake is supposed to be going on, call the earthquake function
