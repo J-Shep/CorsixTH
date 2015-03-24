@@ -183,7 +183,7 @@ local function makeProblemReport(explanation, reproduce_steps, unattached_screen
                  "[Steps To Reproduce?]:\n" ..
                  reproduce_steps .. "\n\n"
 
-  return report, unattached_screenshots, chosen_saved_games
+  return report, unattached_screenshots, unattached_saves
 end
 
 local function makeCrashReport(this_coroutine, error_message, last_dispatch_type, reproduce_steps)
@@ -212,8 +212,7 @@ local function makeCrashReport(this_coroutine, error_message, last_dispatch_type
   -- Make report's message
   -- ----------------------
   local report = "Version: " .. TheApp:getVersion() .. "\n" ..
-                 "OS: " .. getOS() .. "\n" ..
-                 "Config.Language: " .. TheApp.config.language .. "\n"
+                 "OS: " .. getOS() .. "\n"
 
   if not TheApp.world then
     report = "**** [LUA CRASH] Pre-Game: ****\n" .. report

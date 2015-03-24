@@ -84,6 +84,7 @@ tooltip.research_policy.research_progress = "Progress towards the next discovery
 confirmation.attempt_recovery = "Would you like to attempt a recovery?"
 
 menu_file = {
+  report =  " REPORT PROBLEM   ",
   load =    " (SHIFT+L) LOAD   ",
   save =    " (SHIFT+S) SAVE   ",
   restart = " (SHIFT+R) RESTART",
@@ -291,9 +292,40 @@ ui_report_error = {
   save_contact_info = "Save contact info in config.txt?: "
 }
 
+report_problem = {
+  title = "Report Problem",
+  caption_type = "Type of problem?:",
+  type_unexpected_behaviour = "Unexpected Behaviour",
+  type_visual = "Visual",
+  type_audio = "Audio",
+  type_control = "Control",
+  type_crash = "Crash",
+  type_other = "Other",
+  explain = "Please explain what the problem is:",
+  how_to_reproduce = "Please tell us how to reproduce this problem:",
+  screenshots = "If you can please show us this problem with a screenshot:",
+  attach = "Attach",
+  detach = "Detach",
+  attach_save = "Attach Saved Game (.sav)",
+  attach_screenshot = "Attach Screenshot (.bmp)",
+  detach_all = "Detach All",
+  saves = "Please attach a saved game with the problem or before it:",
+  toggle_has_problem = "Saved game has problem?",
+  attach_before = "Before Problem",
+  attach_with = "With Problem",
+
+  prefer_manual_report = "We would like you to report this problem yourself:",
+  please_open_github_issue = "If you have time please report this problem yourself instead " ..
+                             "of making CorsixTH report it now: by opening a Github issue " ..
+                             "and attaching the generated report:",
+  if_not_going_to_manually_report = "If you're not going to report this problem yourself:",
+  please_provide_contact_details = "Please provide us with a way to contact you about this problem such as your email address, CorsixTH forum or Github user name:",
+}
+
 report_error = {
   manually_locate_save = "Please manually locate your latest saved game for this error's hospital if it has a saved game.",
-  not_sent_but_saved = "The error report has been saved because it could not be sent."
+  manually_find_latest_save_file_browser = "Find Most Recent Save (.sav)",
+  not_sent_but_saved = "The error report has been saved because it could not be sent.",
 }
 
 load_game_window = {
